@@ -1,7 +1,7 @@
 {
-  "height": 250,
-  "delay": 1000,
+  "height": 250.0,
+  "radarDelay": 1000,
   "median": 10,
-  "dhtDelay": 10000,
+  "weatherDelay": 10000,
   "reloadInterval": 60000
 }

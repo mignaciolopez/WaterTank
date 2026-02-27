@@ -1,39 +1,78 @@
-#include <Defines.h>
+#pragma once
 
-void loadSettings()
+#include <ArduinoJson.h>
+#include <SPIFFS.h>
+
+namespace CE
 {
-    File file = SPIFFS.open("/settings.json", "r");
-    if (!file)
+    namespace Settings
     {
-        ESP_LOGE(TAG, "Failed to open settings file");      
-        return;
-    }
+        static const char *TAG = "Settings";
 
-    StaticJsonDocument<16U> doc;
-    DeserializationError error = deserializeJson(doc, file);
+        struct Data
+        {
+            float height = 250.0f;
+            unsigned short radarDelay = 1000;
+            unsigned short median = 10;
+            unsigned short weatherDelay = 10000;
+            unsigned short reloadInterval = 60000;
+        } data;
 
-    if (error)
-    {
-        ESP_LOGE(TAG, "JSON Error: %s", error.c_str());
-        return;
-    }
+        inline void loadSettings()
+        {
+            ESP_LOGV(TAG, "loadSettings");
 
-    settings.height         = doc["height"]         | 250;
-    settings.delay          = doc["delay"]          | 1000;
-    settings.median         = doc["median"]         | 10;
-    settings.dhtDelay       = doc["dhtDelay"]       | 10;
-    settings.reloadInterval = doc["reloadInterval"] | 3000;
+            File file = SPIFFS.open("/settings.json", "r");
+            if (!file)
+            {
+                ESP_LOGE(TAG, "Failed to open settings file");
+                return;
+            }
 
-    file.close();
-    ESP_LOGD(TAG, "Settings reloaded");
-}
+            JsonDocument doc;
+            const DeserializationError error = deserializeJson(doc, file);
 
-void SettingsTask(void* pvParameters)
-{
-    while(true)
-    {
-        loadSettings();
-        vTaskDelay(pdMS_TO_TICKS(settings.reloadInterval));
-        ESP_LOGV(TAG, "Free stack: %u bytes.", uxTaskGetStackHighWaterMark(NULL));
+            if (error)
+            {
+                ESP_LOGE(TAG, "JSON Error: %s", error.c_str());
+                return;
+            }
+
+            data.height         = doc["height"]         | 250.0f;
+            data.radarDelay     = doc["radarDelay"]     | 1000;
+            data.median         = doc["median"]         | 10;
+            data.weatherDelay   = doc["weatherDelay"]   | 10000;
+            data.reloadInterval = doc["reloadInterval"] | 60000;
+
+            file.close();
+            ESP_LOGD(TAG, "Settings reloaded");
+        }
+
+        [[noreturn]] inline void Task(void* pvParameters)
+        {
+            ESP_LOGV(TAG, "Task");
+
+            while(true)
+            {
+                loadSettings();
+                vTaskDelay(pdMS_TO_TICKS(data.reloadInterval));
+                ESP_LOGV(TAG, "Free stack: %u bytes.", uxTaskGetStackHighWaterMark(NULL));
+            }
+        }
+
+        inline bool Init()
+        {
+            ESP_LOGV(TAG, "Init");
+
+            if (!SPIFFS.begin(true))
+            {
+                ESP_LOGE(TAG, "SPIFFS failed");
+                return false;
+            }
+
+            xTaskCreate(Task, "SettingsTask", 4096, nullptr, 1, nullptr); //1236~1220
+
+            return true;
+        }
     }
 }
