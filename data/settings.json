@@ -1,5 +1,5 @@
 {
-  "height_cm": 250,
+  "height_cm": 450,
   "radarDelay_ms": 1000,
   "medianWindow": 10,
   "weatherDelay_ms": 10000,

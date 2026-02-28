@@ -11,14 +11,15 @@
 #include <os/Time.hpp>
 #include <config/BuildConfig.hpp>
 
+#include "domain/Global.hpp"
+
 namespace CE::Services::Weather
 {
     static QueueHandle_t g_queue = nullptr;
 
-    float GetSpeedCmPerUs() { return g_speed_cm_per_us; }
-
     [[noreturn]] static void Task(void*)
     {
+        ESP_LOGV(TAG, "Task");
         Drivers::Weather dht(Config::Pins::kDhtPin, DHT11);
         dht.Setup();
 
@@ -29,7 +30,8 @@ namespace CE::Services::Weather
             Domain::WeatherSample sample{};
             if (dht.Read(sample))
             {
-                g_speed_cm_per_us = 331.3f + 0.606f * sample.heatIndexC;
+                Domain::g_speed_m_per_s = 331.3f + 0.606f * sample.heatIndexC;
+                Domain::g_speed_cm_per_us = Domain::g_speed_m_per_s / 10000.0f;
 
                 OS::Queues::Overwrite(g_queue, sample);
                 ESP_LOGD(TAG, "h=%.2f t=%.2f hic=%.2f", sample.humidity, sample.tempC, sample.heatIndexC);
@@ -45,6 +47,7 @@ namespace CE::Services::Weather
 
     bool Setup()
     {
+        ESP_LOGV(TAG, "Setup");
         g_queue = OS::Queues::CreateLatestQueue(sizeof(Domain::WeatherSample));
         if (!g_queue)
             return false;
@@ -54,6 +57,7 @@ namespace CE::Services::Weather
 
     bool TryGetLatest(Domain::WeatherSample& out)
     {
+        ESP_LOGV(TAG, "TryGetLatest");
         if (!g_queue)
             return false;
 

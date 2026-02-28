@@ -9,7 +9,7 @@ namespace CE::Domain
 {
     struct Settings
     {
-        unsigned short height_cm = 250u;
+        unsigned short height_cm = 450u;
         unsigned short radarDelay_ms = 1000u;
         unsigned short medianWindow = 10u;
         unsigned short weatherDelay_ms = 10000u;

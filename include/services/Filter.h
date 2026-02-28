@@ -9,6 +9,6 @@ namespace CE::Services::Filter
     static auto TAG = "FilterService";
 
     [[nodiscard]] bool Setup();
-    bool TryGetLatestFilteredCm(float& out_cm);
+    bool TryGetLatestFilteredCm(unsigned short& out_cm);
 
 } // namespace CE::Services::Filter

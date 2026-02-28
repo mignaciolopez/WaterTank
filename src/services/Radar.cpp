@@ -16,21 +16,20 @@ namespace CE::Services::Radar
 {
     static QueueHandle_t g_queue = nullptr;
 
+    const Drivers::Radar driver(Config::Pins::kTrigPin, Config::Pins::kEchoPin);
+
     [[noreturn]] static void Task(void* pvParameters)
     {
-        Drivers::Radar us(Config::Pins::kTrigPin, Config::Pins::kEchoPin, Config::Build::kPulseInTimeoutUs);
-
-        us.Setup();
-
+        ESP_LOGV(TAG, "Task");
         while (true)
         {
             const auto& settings = Settings::Get();
 
-            float cm = .0f;
-            if (us.ReadDistanceCm(Weather::g_speed_cm_per_us, cm))
+            unsigned short cm = 0;
+            if (driver.ReadDistanceCm(cm))
             {
                 OS::Queues::Overwrite(g_queue, cm);
-                ESP_LOGD(TAG, "raw_cm=%.2f", cm);
+                ESP_LOGD(TAG, "raw_cm=%.2f", cm / 100.0f);
             }
             else
             {
@@ -43,15 +42,19 @@ namespace CE::Services::Radar
 
     bool Setup()
     {
-        g_queue = OS::Queues::CreateLatestQueue(sizeof(float));
+        ESP_LOGV(TAG, "Setup");
+        g_queue = OS::Queues::CreateLatestQueue(sizeof(unsigned short));
         if (!g_queue)
             return false;
+
+        driver.Setup();
 
         return OS::Tasks::Start(Task, TAG, Config::Build::kStackRadarTask, nullptr, Config::Build::kPrioRadar, nullptr);
     }
 
-    bool TryGetLatestRawCm(float& out_cm)
+    bool TryGetLatestRawCm(unsigned short& out_cm)
     {
+        ESP_LOGV(TAG, "TryGetLatestRawCm");
         if (!g_queue)
             return false;
 

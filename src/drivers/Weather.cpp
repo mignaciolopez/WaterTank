@@ -11,6 +11,8 @@ namespace CE::Drivers
 
     bool Weather::Read(Domain::WeatherSample& out)
     {
+        ESP_LOGV(TAG, "Read");
+
         const float h = dht_.readHumidity(true);
         const float t = dht_.readTemperature(false, true);
         const float hic = dht_.computeHeatIndex(t, h, false);

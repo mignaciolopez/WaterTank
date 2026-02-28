@@ -8,8 +8,8 @@ namespace CE::Domain
 {
     struct DistanceSample
     {
-        float raw_cm = .0f;
-        float filtered_cm = .0f;
+        unsigned short raw_cm = 0;
+        unsigned short filtered_cm = 0;
     };
 
 } // namespace CE::Domain

@@ -9,6 +9,6 @@ namespace CE::Services::Radar
     static auto TAG = "RadarService";
 
     [[nodiscard]] bool Setup();
-    bool TryGetLatestRawCm(float& out_cm);
+    bool TryGetLatestRawCm(unsigned short& out_cm);
 
 } // namespace CE::Services::Radar

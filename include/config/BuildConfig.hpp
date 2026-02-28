@@ -26,9 +26,6 @@ namespace CE::Config::Build
     // Filter limits (avoid dynamic memory and VLAs)
     static constexpr std::size_t kMedianMaxWindow = 10U;
 
-    // Ultrasonic
-    static constexpr uint32_t kPulseInTimeoutUs = 300000U; // 30ms -> ~5m max range; prevents blocking forever
-
     // Task stacks (tune as needed)
     static constexpr uint32_t kStackWeatherTask = 4096;
     static constexpr uint32_t kStackRadarTask   = 4096;

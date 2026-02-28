@@ -17,61 +17,71 @@ namespace CE::Services::Filter
 {
     static QueueHandle_t g_queue = nullptr;
 
-    static float MedianInPlace(float* buf, std::size_t n)
+    static unsigned short MedianInPlace(unsigned short* buf, const std::size_t n)
     {
-      // For small n, nth_element is efficient and avoids full sort.
-      const auto mid = buf + n / 2;
-      std::nth_element(buf, mid, buf + n);
-      return *mid;
+        ESP_LOGV(TAG, "MedianInPlace");
+        // For small n, nth_element is efficient and avoids full sort.
+        const auto mid = buf + n / 2;
+        std::nth_element(buf, mid, buf + n);
+        return *mid;
     }
 
     [[noreturn]] static void Task(void*)
     {
-      std::array<float, Config::Build::kMedianMaxWindow> window{};
-      std::size_t index = 0;
-      bool filled = false;
+        ESP_LOGV(TAG, "Task");
 
-      while (true)
-      {
-        const auto& s = Settings::Get();
-        const std::size_t winSize = std::min<std::size_t>(s.medianWindow, window.size());
+        std::array<unsigned short, Config::Build::kMedianMaxWindow> window{};
+        std::size_t index = 0;
+        bool filled = false;
 
-        float raw = 0;
-        if (Radar::TryGetLatestRawCm(raw))
+        while (true)
         {
-          if (raw > 0.0f && raw < s.height_cm && winSize >= 3)
-          {
-            window[index] = raw;
-            index = (index + 1) % winSize;
-            if (index == 0)
-                filled = true;
+            const auto& s = Settings::Get();
+            const std::size_t winSize = std::min<std::size_t>(s.medianWindow, window.size());
+            ESP_LOGD(TAG, "winSize=%d", winSize);
 
-            if (filled)
+            unsigned short raw = 0;
+            if (Radar::TryGetLatestRawCm(raw))
             {
-              // copy to temp for median (nth_element mutates)
-              std::array<float, Config::Build::kMedianMaxWindow> tmp = window;
-              float filtered = MedianInPlace(tmp.data(), winSize);
-              OS::Queues::Overwrite(g_queue, filtered);
-              ESP_LOGD(TAG, "filtered_cm=%.2f", filtered);
-            }
-          }
-        }
+                if (raw > 0 && raw < s.height_cm * 100 && winSize >= 3)
+                {
+                    window[index] = raw;
+                    index = (index + 1) % winSize;
+                    if (index == 0)
+                        filled = true;
 
-        OS::Time::SleepMs(s.radarDelay_ms);
-      }
+                    if (filled)
+                    {
+                        // copy to temp for median (nth_element mutates)
+                        std::array<unsigned short, Config::Build::kMedianMaxWindow> tmp = window;
+                        unsigned short filtered = MedianInPlace(tmp.data(), winSize);
+                        OS::Queues::Overwrite(g_queue, filtered);
+                        ESP_LOGD(TAG, "filtered_cm=%.2f", filtered / 100.0f);
+                    }
+                }
+            }
+            else
+            {
+                ESP_LOGW(TAG, "Radar::TryGetLatestRawCm Failed!");
+            }
+
+            OS::Time::SleepMs(s.radarDelay_ms);
+        }
     }
 
     bool Setup()
     {
-      g_queue = OS::Queues::CreateLatestQueue(sizeof(float));
+        ESP_LOGV(TAG, "Setup");
+      g_queue = OS::Queues::CreateLatestQueue(sizeof(unsigned short));
       if (!g_queue)
           return false;
 
       return OS::Tasks::Start(Task, TAG, Config::Build::kStackFilterTask, nullptr, Config::Build::kPrioFilter, nullptr);
     }
 
-    bool TryGetLatestFilteredCm(float& out_cm)
+    bool TryGetLatestFilteredCm(unsigned short& out_cm)
     {
+        ESP_LOGV(TAG, "TryGetLatestFilteredCm");
       if (!g_queue)
           return false;
 

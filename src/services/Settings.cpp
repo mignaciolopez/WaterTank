@@ -15,6 +15,7 @@ namespace CE::Services::Settings
 
     static void Load()
     {
+        ESP_LOGV(TAG, "Load");
       File file = SPIFFS.open("/settings.json", "r");
       if (!file)
       {
@@ -48,6 +49,7 @@ namespace CE::Services::Settings
 
     [[noreturn]] static void Task(void*)
     {
+        ESP_LOGV(TAG, "Task");
       while (true)
       {
         Load();
@@ -57,6 +59,7 @@ namespace CE::Services::Settings
 
     bool Setup()
     {
+        ESP_LOGV(TAG, "Setup");
       if (!SPIFFS.begin(true))
       {
         ESP_LOGE(TAG, "SPIFFS mount failed");

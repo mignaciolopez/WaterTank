@@ -11,15 +11,14 @@ namespace CE::Drivers
     {
     public:
         static const char* TAG;
-        Radar(byte trigPin, byte echoPin, unsigned long timeoutUs);
+        Radar(byte trigPin, byte echoPin);
 
         void Setup() const;
-        bool ReadDistanceCm(float speed_cm_per_us, float& out_cm);
+        bool ReadDistanceCm(unsigned short& out_cm) const;
 
     private:
         byte trig_;
         byte echo_;
-        unsigned long timeoutUs_;
     };
 
 } // namespace CE::Drivers
