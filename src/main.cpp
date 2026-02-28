@@ -38,5 +38,6 @@ void setup()
 
 void loop()
 {
-    //App::Loop();
+    App::Loop();
+    delay(10000);
 }

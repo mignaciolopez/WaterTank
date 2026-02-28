@@ -13,6 +13,18 @@ namespace CE::Services::Settings
 {
     static Domain::Settings g_settings;
 
+    static void PrintSettings()
+    {
+        ESP_LOGD(TAG, "Settings loaded: height_cm=%u, criticalLevel_cm=%u, minLevel_cm=%u, maxLevel_cm=%u, radarDelay_ms=%u, medianWindow=%u, weatherDelay_ms=%u",
+               g_settings.height_cm,
+               g_settings.criticalLevel_cm,
+               g_settings.minLevel_cm,
+               g_settings.maxLevel_cm,
+               g_settings.radarDelay_ms,
+               g_settings.medianWindow,
+               g_settings.weatherDelay_ms);
+    }
+
     [[nodiscard]] static bool Load()
     {
         ESP_LOGV(TAG, "Load");
@@ -33,23 +45,20 @@ namespace CE::Services::Settings
             return false;
         }
 
-        g_settings.height_cm          = doc["height_cm"]         | g_settings.height_cm;
-        g_settings.radarDelay_ms      = doc["radarDelay_ms"]     | g_settings.radarDelay_ms;
-        g_settings.medianWindow       = doc["medianWindow"]      | g_settings.medianWindow;
-        g_settings.weatherDelay_ms    = doc["weatherDelay_ms"]   | g_settings.weatherDelay_ms;
-        g_settings.reloadInterval_ms  = doc["reloadInterval_ms"] | g_settings.reloadInterval_ms;
+        g_settings.height_cm            = doc["height_cm"]          | g_settings.height_cm;
+        g_settings.criticalLevel_cm     = doc["criticalLevel_cm"]   | g_settings.criticalLevel_cm;
+        g_settings.minLevel_cm          = doc["minLevel_cm"]        | g_settings.minLevel_cm;
+        g_settings.maxLevel_cm          = doc["maxLevel_cm"]        | g_settings.maxLevel_cm;
+        g_settings.radarDelay_ms        = doc["radarDelay_ms"]      | g_settings.radarDelay_ms;
+        g_settings.medianWindow         = doc["medianWindow"]       | g_settings.medianWindow;
+        g_settings.weatherDelay_ms      = doc["weatherDelay_ms"]    | g_settings.weatherDelay_ms;
 
-        ESP_LOGD(TAG, "Settings loaded: height_cm=%u radarDelay_ms=%u medianWindow=%u weatherDelay_ms=%u reloadInterval_ms=%u",
-               g_settings.height_cm,
-               g_settings.radarDelay_ms,
-               g_settings.medianWindow,
-               g_settings.weatherDelay_ms,
-               g_settings.reloadInterval_ms);
+        PrintSettings();
 
         return true;
     }
 
-    static bool Save()
+    [[nodiscard]] static bool Save()
     {
         ESP_LOGV(TAG, "Save");
         File file = SPIFFS.open("/settings.json", "w");
@@ -60,11 +69,13 @@ namespace CE::Services::Settings
         }
 
         JsonDocument doc;
-        doc["height_cm"] = g_settings.height_cm;
-        doc["radarDelay_ms"] = g_settings.radarDelay_ms;
-        doc["medianWindow"] = g_settings.medianWindow;
-        doc["weatherDelay_ms"] = g_settings.weatherDelay_ms;
-        doc["reloadInterval_ms"] = g_settings.reloadInterval_ms;
+        doc["height_cm"]        = g_settings.height_cm;
+        doc["criticalLevel_cm"] = g_settings.criticalLevel_cm;
+        doc["minLevel_cm"]      = g_settings.minLevel_cm;
+        doc["maxLevel_cm"]      = g_settings.maxLevel_cm;
+        doc["radarDelay_ms"]    = g_settings.radarDelay_ms;
+        doc["medianWindow"]     = g_settings.medianWindow;
+        doc["weatherDelay_ms"]  = g_settings.weatherDelay_ms;
 
         const auto bytesWritten = serializeJson(doc, file);
         file.close();
@@ -75,26 +86,9 @@ namespace CE::Services::Settings
             return false;
         }
 
-        ESP_LOGD(TAG, "Settings saved: height_cm=%u radarDelay_ms=%u medianWindow=%u weatherDelay_ms=%u reloadInterval_ms=%u",
-                 g_settings.height_cm,
-                 g_settings.radarDelay_ms,
-                 g_settings.medianWindow,
-                 g_settings.weatherDelay_ms,
-                 g_settings.reloadInterval_ms);
+        PrintSettings();
 
         return true;
-    }
-
-    [[noreturn]] static void Task(void*)
-    {
-        ESP_LOGV(TAG, "Task");
-        while (true)
-        {
-            if (!Load())
-                Save();
-
-            OS::Time::SleepMs(g_settings.reloadInterval_ms);
-        }
     }
 
     bool Setup()
@@ -106,7 +100,10 @@ namespace CE::Services::Settings
             return false;
         }
 
-        OS::Tasks::Start(Task, TAG, Config::Build::kStackSettingsTask, nullptr, Config::Build::kPrioSettings, nullptr);
+        if (!Load())
+            if (!Save())
+                return false;
+
         return true;
     }
 

@@ -15,12 +15,14 @@ namespace CE::Drivers
 
         [[nodiscard]] bool Setup() const;
 
-        void SwitchOn() const;
-        void SwitchOff() const;
+        void SwitchOn();
+        void SwitchOff();
+        [[nodiscard]] bool IsOn() const;
 
     private:
         byte switchPin_;
         byte led_;
         byte trig_;
+        bool state;
     };
 } // CE::Drivers

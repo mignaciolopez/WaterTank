@@ -17,15 +17,15 @@ namespace CE::App
 
     inline bool Setup()
     {
-        if (!Services::Pump::Setup())
-        {
-            ESP_LOGE(TAG, "Pump Setup failed");
-            return false;
-        }
-
         if (!Services::Settings::Setup())
         {
             ESP_LOGE(TAG, "Settings Setup failed");
+            return false;
+        }
+
+        if (!Services::Pump::Setup())
+        {
+            ESP_LOGE(TAG, "Pump Setup failed");
             return false;
         }
 

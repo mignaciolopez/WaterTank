@@ -9,7 +9,7 @@ namespace CE::Drivers
     const char* Pump::TAG = "PumpDriver";
 
     Pump::Pump(const byte switchPin, const byte ledPin, const byte trigPin)
-        : switchPin_(switchPin), led_(ledPin), trig_(trigPin)
+        : switchPin_(switchPin), led_(ledPin), trig_(trigPin), state(false)
     {
         ESP_LOGV(TAG, "Constructor");
     }
@@ -28,18 +28,24 @@ namespace CE::Drivers
         return true;
     }
 
-    void Pump::SwitchOn() const
+    void Pump::SwitchOn()
     {
         ESP_LOGV(TAG, "SwitchOn");
         digitalWrite(led_, HIGH);
         digitalWrite(switchPin_, HIGH);
+        state = true;
     }
 
-    void Pump::SwitchOff() const
+    void Pump::SwitchOff()
     {
         ESP_LOGV(TAG, "SwitchOff");
         digitalWrite(switchPin_, LOW);
         digitalWrite(led_, LOW);
+        state = false;
     }
 
+    bool Pump::IsOn() const
+    {
+        return state;
+    }
 } // CE::Drivers

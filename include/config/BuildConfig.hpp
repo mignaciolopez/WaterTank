@@ -30,16 +30,12 @@ namespace CE::Config::Build
     static constexpr uint32_t kStackWeatherTask = 4096;
     static constexpr uint32_t kStackRadarTask   = 4096;
     static constexpr uint32_t kStackFilterTask  = 4096;
-    static constexpr uint32_t kStackAppTask     = 4096;
-    static constexpr uint32_t kStackSettingsTask= 4096;
     static constexpr uint32_t kStackPumpTask    = 4096;
 
     // Task priorities
     static constexpr UBaseType_t kPrioWeather   = 2;
     static constexpr UBaseType_t kPrioRadar     = 2;
     static constexpr UBaseType_t kPrioFilter    = 2;
-    static constexpr UBaseType_t kPrioApp       = 1;
-    static constexpr UBaseType_t kPrioSettings  = 1;
     static constexpr UBaseType_t kPrioPump      = 3;
 
 } // namespace CE::config::Build

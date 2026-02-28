@@ -1,7 +1,9 @@
 {
-  "height_cm": 450,
+  "height_cm": 110,
+  "criticalLevel_cm": 30,
+  "minLevel_cm": 50,
+  "maxLevel_cm": 70,
   "radarDelay_ms": 1000,
   "medianWindow": 10,
-  "weatherDelay_ms": 10000,
-  "reloadInterval_ms": 60000
+  "weatherDelay_ms": 10000
 }
