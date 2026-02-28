@@ -13,32 +13,30 @@ bool initState = false;
 void setup()
 {
     pinMode(Config::Pins::kBlueLed, OUTPUT);
-    digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOn);
+    digitalWrite(Config::Pins::kBlueLed, Config::Build::kLedOn);
 
     Serial.begin(921600);
-    esp_log_level_set("*", ESP_LOG_INFO);
+    esp_log_level_set("*", ESP_LOG_VERBOSE);
 
-    delay(1000);
+    delay(500);
     ESP_LOGI(TAG, "Boot");
-    delay(2000);
 
     while (!App::Setup())
     {
         for (int i = 0; i < 30; ++i)
         {
-            digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOff);
+            digitalWrite(Config::Pins::kBlueLed, Config::Build::kLedOff);
             delay(500);
-            digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOn);
+            digitalWrite(Config::Pins::kBlueLed, Config::Build::kLedOn);
             delay(500);
         }
         esp_restart();
     }
 
-    digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOff);
+    digitalWrite(Config::Pins::kBlueLed, Config::Build::kLedOff);
 }
 
 void loop()
 {
-    App::Loop();
-    delay(1000); // keep the main loop light; tasks do the real work
+    //App::Loop();
 }

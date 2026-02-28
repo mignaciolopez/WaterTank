@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <cstddef>
 
+#include "domain/Global.hpp"
+
 namespace CE::Services::Filter
 {
     static QueueHandle_t g_queue = nullptr;
@@ -54,7 +56,7 @@ namespace CE::Services::Filter
                     {
                         // copy to temp for median (nth_element mutates)
                         std::array<unsigned short, Config::Build::kMedianMaxWindow> tmp = window;
-                        unsigned short filtered = MedianInPlace(tmp.data(), winSize);
+                        unsigned short filtered = MedianInPlace(tmp.data(), winSize) + Domain::kFilteredDistanceOffset;
                         OS::Queues::Overwrite(g_queue, filtered);
                         ESP_LOGD(TAG, "filtered_cm=%.2f", filtered / 100.0f);
                     }
