@@ -3,11 +3,13 @@
 //
 
 #pragma once
-#include <domain/SettingsModel.hpp>
+#include <domain/Settings.hpp>
 
 namespace CE::Services::Settings
 {
-    bool Init();
+    static auto TAG = "SettingsService";
+
+    [[nodiscard]] bool Setup();
     const Domain::Settings& Get(); // always returns current settings snapshot
 
 } // namespace CE::Services::Settings

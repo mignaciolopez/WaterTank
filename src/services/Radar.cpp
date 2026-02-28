@@ -2,10 +2,10 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <services/RadarService.h>
-#include <services/SettingsService.h>
-#include <services/WeatherService.h>
-#include <drivers/UltrasonicDriver.h>
+#include <services/Radar.h>
+#include <services/Settings.h>
+#include <services/Weather.h>
+#include <drivers/Radar.h>
 #include <config/Pins.hpp>
 #include <config/BuildConfig.hpp>
 #include <os/Queues.hpp>
@@ -14,15 +14,13 @@
 
 namespace CE::Services::Radar
 {
-    static const char* TAG = "RadarService";
-
     static QueueHandle_t g_queue = nullptr;
 
     [[noreturn]] static void Task(void* pvParameters)
     {
-        Drivers::Ultrasonic us(Config::Pins::kTrigPin, Config::Pins::kEchoPin, Config::Build::kPulseInTimeoutUs);
+        Drivers::Radar us(Config::Pins::kTrigPin, Config::Pins::kEchoPin, Config::Build::kPulseInTimeoutUs);
 
-        us.Begin();
+        us.Setup();
 
         while (true)
         {
@@ -43,7 +41,7 @@ namespace CE::Services::Radar
         }
     }
 
-    bool Init()
+    bool Setup()
     {
         g_queue = OS::Queues::CreateLatestQueue(sizeof(float));
         if (!g_queue)

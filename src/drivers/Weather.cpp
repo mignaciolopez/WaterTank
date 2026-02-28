@@ -3,11 +3,13 @@
 //
 
 #include <cmath>
-#include <drivers/DhtDriver.h>
+#include <drivers/Weather.h>
 
 namespace CE::Drivers
 {
-    bool DhtDriver::Read(Domain::WeatherSample& out)
+    const char* Weather::TAG = "WeatherDriver";
+
+    bool Weather::Read(Domain::WeatherSample& out)
     {
         const float h = dht_.readHumidity(true);
         const float t = dht_.readTemperature(false, true);

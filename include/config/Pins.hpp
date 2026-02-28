@@ -8,17 +8,22 @@ namespace CE::Config::Pins
 {
     // LED
 #if CONFIG_IDF_TARGET_ESP32C3
-    static constexpr int kBlueLed = 8;
+    static constexpr byte kBlueLed = 8;
 #elif CONFIG_IDF_TARGET_ESP32
-    static constexpr int kBlueLed = 2;
+    static constexpr byte kBlueLed = 2;
 #else
-    static constexpr int kBlueLed = 2;
+    static constexpr byte kBlueLed = 2;
 #endif
 
     // DHT
-    static constexpr int kDhtPin = 7;
+    static constexpr byte kDhtPin = 3;
 
     // Ultrasonic
-    static constexpr int kTrigPin = 4;
-    static constexpr int kEchoPin = 2;
+    static constexpr byte kTrigPin = 4;
+    static constexpr byte kEchoPin = 5;
+
+    //Pump
+    static constexpr byte kPumpSwitchPin = 6;
+    static constexpr byte kPumpTrigPin   = 7;
+    static constexpr byte kPumpLedPin    = 9;
 }

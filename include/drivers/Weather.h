@@ -4,16 +4,17 @@
 
 #pragma once
 #include <DHT.h>
-#include <domain/WeatherModel.hpp>
+#include <domain/Weather.hpp>
 
 namespace CE::Drivers
 {
-    class DhtDriver
+    class Weather
     {
     public:
-        DhtDriver(const int pin, const int type) : dht_(pin, type) {}
+        static const char* TAG;
+        Weather(const int pin, const int type) : dht_(pin, type) {}
 
-        void Begin() { dht_.begin(); }
+        void Setup() { dht_.begin(); }
 
         // Returns true when read is valid.
         bool Read(Domain::WeatherSample& out);

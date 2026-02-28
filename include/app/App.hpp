@@ -4,46 +4,50 @@
 
 #pragma once
 
-#include <services/SettingsService.h>
-#include <services/WeatherService.h>
-#include <services/RadarService.h>
-#include <services/FilterService.h>
+#include <services/Settings.h>
+#include <services/Weather.h>
+#include <services/Radar.h>
+#include <services/Filter.h>
 
 namespace CE::App
 {
     static const char* TAG = "App";
 
-    inline bool Init()
+    inline bool Setup()
     {
-        if (!Services::Settings::Init())
+        if (!Services::Settings::Setup())
         {
-            ESP_LOGE(TAG, "Settings init failed");
+            ESP_LOGE(TAG, "Settings Setup failed");
             return false;
         }
+        delay(1000);
 
-        if (!Services::Weather::Init())
+        if (!Services::Weather::Setup())
         {
-            ESP_LOGE(TAG, "Weather init failed");
+            ESP_LOGE(TAG, "Weather Setup failed");
             return false;
         }
+        delay(1000);
 
-        if (!Services::Radar::Init())
+        if (!Services::Radar::Setup())
         {
-            ESP_LOGE(TAG, "Radar init failed");
+            ESP_LOGE(TAG, "Radar Setup failed");
             return false;
         }
+        delay(1000);
 
-        if (!Services::Filter::Init())
+        if (!Services::Filter::Setup())
         {
-            ESP_LOGE(TAG, "Filter init failed");
+            ESP_LOGE(TAG, "Filter Setup failed");
             return false;
         }
+        delay(1000);
 
-        ESP_LOGI(TAG, "Init OK");
+        ESP_LOGI(TAG, "Setup OK");
         return true;
     }
 
-    inline void loop()
+    inline void Loop()
     {
         // A nice pattern: keep logging / UI / networking in the main loop
         // and keep acquisition/filtering in tasks.

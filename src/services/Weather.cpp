@@ -2,9 +2,9 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <services/WeatherService.h>
-#include <services/SettingsService.h>
-#include <drivers/DhtDriver.h>
+#include <services/Weather.h>
+#include <services/Settings.h>
+#include <drivers/Weather.h>
 #include <config/Pins.hpp>
 #include <os/Queues.hpp>
 #include <os/Tasks.hpp>
@@ -13,16 +13,14 @@
 
 namespace CE::Services::Weather
 {
-    static const char* TAG = "WeatherService";
-
     static QueueHandle_t g_queue = nullptr;
 
     float GetSpeedCmPerUs() { return g_speed_cm_per_us; }
 
     [[noreturn]] static void Task(void*)
     {
-        Drivers::DhtDriver dht(Config::Pins::kDhtPin, DHT11);
-        dht.Begin();
+        Drivers::Weather dht(Config::Pins::kDhtPin, DHT11);
+        dht.Setup();
 
         while (true)
         {
@@ -45,7 +43,7 @@ namespace CE::Services::Weather
         }
     }
 
-    bool Init()
+    bool Setup()
     {
         g_queue = OS::Queues::CreateLatestQueue(sizeof(Domain::WeatherSample));
         if (!g_queue)

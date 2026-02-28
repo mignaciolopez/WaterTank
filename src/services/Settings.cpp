@@ -2,7 +2,7 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <services/SettingsService.h>
+#include <services/Settings.h>
 #include <os/Time.hpp>
 #include <os/Tasks.hpp>
 #include <SPIFFS.h>
@@ -11,8 +11,6 @@
 
 namespace CE::Services::Settings
 {
-    static const char* TAG = "SettingsService";
-
     static Domain::Settings g_settings;
 
     static void Load()
@@ -57,7 +55,7 @@ namespace CE::Services::Settings
       }
     }
 
-    bool Init()
+    bool Setup()
     {
       if (!SPIFFS.begin(true))
       {

@@ -9,11 +9,11 @@
 namespace CE::OS::Tasks
 {
 
-    inline bool Start(TaskFunction_t fn,
+    inline bool Start(const TaskFunction_t fn,
                       const char* name,
-                      uint32_t stackBytes,
+                      const uint32_t stackBytes,
                       void* param,
-                      UBaseType_t prio,
+                      const UBaseType_t prio,
                       TaskHandle_t* outHandle = nullptr)
     {
         return xTaskCreate(fn, name, stackBytes, param, prio, outHandle) == pdPASS;

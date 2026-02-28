@@ -2,22 +2,19 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <services/FilterService.h>
-#include <services/SettingsService.h>
-#include <services/RadarService.h>
+#include <services/Filter.h>
+#include <services/Settings.h>
+#include <services/Radar.h>
 #include <config/BuildConfig.hpp>
 #include <os/Queues.hpp>
 #include <os/Tasks.hpp>
 #include <os/Time.hpp>
-#include <esp_log.h>
 #include <array>
 #include <algorithm>
 #include <cstddef>
 
 namespace CE::Services::Filter
 {
-    static const char* TAG = "FilterService";
-
     static QueueHandle_t g_queue = nullptr;
 
     static float MedianInPlace(float* buf, std::size_t n)
@@ -64,7 +61,7 @@ namespace CE::Services::Filter
       }
     }
 
-    bool Init()
+    bool Setup()
     {
       g_queue = OS::Queues::CreateLatestQueue(sizeof(float));
       if (!g_queue)

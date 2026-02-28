@@ -5,7 +5,6 @@
 #pragma once
 
 #include <cstddef>
-#include <cstdint>
 #include "ArduinoJson/Variant/VariantRefBase.hpp"
 
 namespace CE::Config::Build

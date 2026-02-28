@@ -20,16 +20,18 @@ void setup()
 
     delay(1000);
     ESP_LOGI(TAG, "Boot");
+    delay(2000);
 
-    while (!App::Init())
+    while (!App::Setup())
     {
-        for (int i = 0; i < 60; ++i)
+        for (int i = 0; i < 30; ++i)
         {
             digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOff);
             delay(500);
             digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOn);
             delay(500);
         }
+        esp_restart();
     }
 
     digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOff);
@@ -37,6 +39,6 @@ void setup()
 
 void loop()
 {
-    App::loop();
+    App::Loop();
     delay(1000); // keep the main loop light; tasks do the real work
 }

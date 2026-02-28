@@ -2,22 +2,21 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <Arduino.h>
-#include <drivers/UltrasonicDriver.h>
+#include <drivers/Radar.h>
 
 namespace CE::Drivers
 {
-    Ultrasonic::Ultrasonic(int trigPin, int echoPin, uint32_t timeoutUs)
+    Radar::Radar(byte trigPin, byte echoPin, unsigned long timeoutUs)
       : trig_(trigPin), echo_(echoPin), timeoutUs_(timeoutUs) {}
 
-    void Ultrasonic::Begin() const
+    void Radar::Setup() const
     {
         pinMode(trig_, OUTPUT);
         pinMode(echo_, INPUT);
         digitalWrite(trig_, HIGH);
     }
 
-    bool Ultrasonic::ReadDistanceCm(const float speed_cm_per_us, float& out_cm)
+    bool Radar::ReadDistanceCm(const float speed_cm_per_us, float& out_cm)
     {
         // Trigger pulse
         digitalWrite(trig_, LOW);
@@ -27,7 +26,7 @@ namespace CE::Drivers
         digitalWrite(trig_, LOW);
 
         // Timeout prevents blocking forever
-        const float duration_us = static_cast<float>(pulseIn(echo_, HIGH, timeoutUs_));
+        const auto duration_us = static_cast<float>(pulseIn(echo_, HIGH, timeoutUs_));
         if (duration_us == .0f)
         {
             return false;

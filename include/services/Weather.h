@@ -3,12 +3,14 @@
 //
 
 #pragma once
-#include <domain/WeatherModel.hpp>
+#include <domain/Weather.hpp>
 
 namespace CE::Services::Weather
 {
+    static auto TAG = "WeatherService";
+
     static float g_speed_cm_per_us = 331.3f + 0.606f * 20.0f;
-    bool Init();
+    [[nodiscard]] bool Setup();
     bool TryGetLatest(Domain::WeatherSample& out);
 
 } // namespace CE::Services::Weather

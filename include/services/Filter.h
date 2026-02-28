@@ -6,7 +6,9 @@
 
 namespace CE::Services::Filter
 {
-    bool Init();
+    static auto TAG = "FilterService";
+
+    [[nodiscard]] bool Setup();
     bool TryGetLatestFilteredCm(float& out_cm);
 
 } // namespace CE::Services::Filter
