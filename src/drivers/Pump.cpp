@@ -28,4 +28,18 @@ namespace CE::Drivers
         return true;
     }
 
+    void Pump::SwitchOn() const
+    {
+        ESP_LOGV(TAG, "SwitchOn");
+        digitalWrite(led_, HIGH);
+        digitalWrite(switchPin_, HIGH);
+    }
+
+    void Pump::SwitchOff() const
+    {
+        ESP_LOGV(TAG, "SwitchOff");
+        digitalWrite(switchPin_, LOW);
+        digitalWrite(led_, LOW);
+    }
+
 } // CE::Drivers

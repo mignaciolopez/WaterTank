@@ -10,8 +10,8 @@
 namespace CE::Config::Build
 {
 #if CONFIG_IDF_TARGET_ESP32C3
-    static constexpr std::size_t kBlueLedOn = LOW;
-    static constexpr std::size_t kBlueLedOff = HIGH;
+    static constexpr std::size_t kLedOn = LOW;
+    static constexpr std::size_t kLedOff = HIGH;
 #elif CONFIG_IDF_TARGET_ESP32
     static constexpr std::size_t kBlueLedOn = HIGH;
     static constexpr std::size_t kBlueLedOff = LOW;
@@ -32,12 +32,14 @@ namespace CE::Config::Build
     static constexpr uint32_t kStackFilterTask  = 4096;
     static constexpr uint32_t kStackAppTask     = 4096;
     static constexpr uint32_t kStackSettingsTask= 4096;
+    static constexpr uint32_t kStackPumpTask    = 4096;
 
     // Task priorities
-    static constexpr UBaseType_t kPrioWeather = 2;
-    static constexpr UBaseType_t kPrioRadar   = 2;
-    static constexpr UBaseType_t kPrioFilter  = 2;
-    static constexpr UBaseType_t kPrioApp     = 1;
-    static constexpr UBaseType_t kPrioSettings= 1;
+    static constexpr UBaseType_t kPrioWeather   = 2;
+    static constexpr UBaseType_t kPrioRadar     = 2;
+    static constexpr UBaseType_t kPrioFilter    = 2;
+    static constexpr UBaseType_t kPrioApp       = 1;
+    static constexpr UBaseType_t kPrioSettings  = 1;
+    static constexpr UBaseType_t kPrioPump      = 3;
 
 } // namespace CE::config::Build

@@ -15,6 +15,9 @@ namespace CE::Drivers
 
         [[nodiscard]] bool Setup() const;
 
+        void SwitchOn() const;
+        void SwitchOff() const;
+
     private:
         byte switchPin_;
         byte led_;
