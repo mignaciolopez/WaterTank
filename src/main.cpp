@@ -1,48 +1,42 @@
-#include <Filters.hpp>
-#include <Globals.h>
-#include <Radar.hpp>
-#include <Settings.hpp>
-#include <Weather.hpp>
+#include <Arduino.h>
+#include <app/App.hpp>
+#include "config/BuildConfig.hpp"
+#include <config/Pins.hpp>
+#include <esp_log.h>
 
-void setupStart()
-{
-    CE::Globals::INIT = false;
-    pinMode(BLUE_LED, OUTPUT);
-    digitalWrite(BLUE_LED, BLUE_LED_ON);
-    Serial.begin(SERIAL_SPEED);
-    esp_log_level_set("*", ESP_LOG_INFO);
-    delay(1000);
-    ESP_LOGV("Setup", "Starting");
-}
+using namespace CE;
 
-void setupEnd()
-{
-    CE::Globals::INIT = true;
-    digitalWrite(TX_TRIGGER_PIN, LOW);
-    digitalWrite(BLUE_LED, BLUE_LED_OFF);
-    ESP_LOGV("Setup", "End");
-}
+static const char* TAG = "Main";
+
+bool initState = false;
 
 void setup()
 {
-    setupStart();
-    if (!CE::Settings::Init())
+    pinMode(Config::Pins::kBlueLed, OUTPUT);
+    digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOn);
+
+    Serial.begin(921600);
+    esp_log_level_set("*", ESP_LOG_INFO);
+
+    delay(1000);
+    ESP_LOGI(TAG, "Boot");
+
+    while (!App::Init())
     {
-        return;
+        for (int i = 0; i < 60; ++i)
+        {
+            digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOff);
+            delay(500);
+            digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOn);
+            delay(500);
+        }
     }
-    CE::Weather::Init();
-    CE::Radar::Init();
-    CE::Filters::Init();
-    setupEnd();
+
+    digitalWrite(Config::Pins::kBlueLed, Config::Build::kBlueLedOff);
 }
 
 void loop()
 {
-    if (!CE::Globals::INIT)
-    {
-        digitalWrite(BLUE_LED, BLUE_LED_OFF);
-        delay(500);
-        digitalWrite(BLUE_LED, BLUE_LED_ON);
-        ESP_LOGV("MEM", "Free heap: %u bytes.", ESP.getFreeHeap());
-    }
+    App::loop();
+    delay(1000); // keep the main loop light; tasks do the real work
 }
