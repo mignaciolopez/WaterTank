@@ -4,23 +4,15 @@
 
 #pragma once
 
+#include "config/Pins.hpp"
+#include "drivers/Pump.h"
+
 namespace CE::Services::Pump
 {
     static auto TAG = "PumpService";
 
-    enum WaterLevel
-    {
-        Invalid,
-        Full,
-        Normal,
-        Low,
-        Critical
-    };
-    static auto status = WaterLevel::Normal;
+    static Drivers::Pump driver(Config::Pins::kPumpSwitchPin, Config::Pins::kPumpLedPin, Config::Pins::kPumpTrigPin);
 
     [[nodiscard]] bool Setup();
-
-    void UpdateState(unsigned short distance);
-    const char* StatusToString();
 
 } // namespace CE::Services::Filter

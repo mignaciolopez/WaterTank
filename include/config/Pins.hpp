@@ -24,6 +24,6 @@ namespace CE::Config::Pins
 
     //Pump
     static constexpr byte kPumpSwitchPin = 6;
-    static constexpr byte kPumpTrigPin   = 7;
-    static constexpr byte kPumpLedPin    = 9;
+    static constexpr byte kPumpLedPin    = 7;
+    static constexpr byte kPumpTrigPin   = 9;
 }
