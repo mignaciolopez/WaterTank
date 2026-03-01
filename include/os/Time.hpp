@@ -50,4 +50,17 @@ namespace CE::OS::Time
         }
     }
 
+    inline void FormatTime(char* buffer, size_t size, const char* format = "%Y-%m-%d %H:%M:%S")
+    {
+        tm timeInfo = GetLocalTime();
+        strftime(buffer, size, format, &timeInfo);
+    }
+
+    inline const char* GetFormattedTime(const char* format = "%Y-%m-%d %H:%M:%S")
+    {
+        static char buffer[64];
+        FormatTime(buffer, sizeof(buffer), format);
+        return buffer;
+    }
+
 } // namespace CE::OS::Time
