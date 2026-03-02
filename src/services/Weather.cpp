@@ -4,7 +4,6 @@
 
 #include <services/Weather.h>
 #include <services/Settings.h>
-#include <drivers/Weather.h>
 #include <config/Pins.hpp>
 #include <os/Queues.hpp>
 #include <os/Tasks.hpp>
@@ -20,21 +19,18 @@ namespace CE::Services::Weather
     [[noreturn]] static void Task(void*)
     {
         ESP_LOGV(TAG, "Task");
-        Drivers::Weather dht(Config::Pins::kDhtPin, DHT11);
-        dht.Setup();
 
         while (true)
         {
             const auto& s = Settings::Get();
 
             Domain::WeatherSample sample{};
-            if (dht.Read(sample))
+            if (driver.Read(sample))
             {
                 Domain::g_speed_m_per_s = 331.3f + 0.606f * sample.heatIndexC;
                 Domain::g_speed_cm_per_us = Domain::g_speed_m_per_s / 10000.0f;
 
                 OS::Queues::Overwrite(g_queue, sample);
-                ESP_LOGD(TAG, "h=%.2f t=%.2f hic=%.2f", sample.humidity, sample.tempC, sample.heatIndexC);
             }
             else
             {
@@ -51,6 +47,8 @@ namespace CE::Services::Weather
         g_queue = OS::Queues::CreateLatestQueue(sizeof(Domain::WeatherSample));
         if (!g_queue)
             return false;
+
+        driver.Setup();
 
         return OS::Tasks::Start(Task, TAG, Config::Build::kStackWeatherTask, nullptr, Config::Build::kPrioWeather, nullptr);
     }

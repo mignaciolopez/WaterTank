@@ -2,8 +2,8 @@
   "height_cm": 110,
   "criticalLevel_cm": 30,
   "minLevel_cm": 50,
-  "maxLevel_cm": 70,
+  "maxLevel_cm": 80,
   "radarDelay_ms": 1000,
-  "medianWindow": 10,
+  "medianWindow": 5,
   "weatherDelay_ms": 10000
 }

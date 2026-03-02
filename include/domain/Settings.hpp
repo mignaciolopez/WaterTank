@@ -14,7 +14,7 @@ namespace CE::Domain
         unsigned short minLevel_cm          = 50u;      //Minimum water level to START pumping
         unsigned short maxLevel_cm          = 80u;      //Maximum water level to STOP pumping
         unsigned short radarDelay_ms        = 1000u;    //Delay between distance measures
-        unsigned short medianWindow         = 10u;      //Number of measures to average
+        unsigned short medianWindow         = 5u;      //Number of measures to median
         unsigned short weatherDelay_ms      = 10000u;   //Delay between weather updates
     };
 

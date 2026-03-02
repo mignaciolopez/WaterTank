@@ -5,7 +5,7 @@
 #include <services/Radar.h>
 #include <services/Settings.h>
 #include <services/Weather.h>
-#include <drivers/Radar.h>
+#include <drivers/JSN-SR04M-2.h>
 #include <config/Pins.hpp>
 #include <config/BuildConfig.hpp>
 #include <os/Queues.hpp>
@@ -16,7 +16,7 @@ namespace CE::Services::Radar
 {
     static QueueHandle_t g_queue = nullptr;
 
-    const Drivers::Radar driver(Config::Pins::kTrigPin, Config::Pins::kEchoPin);
+    const Drivers::JSN_SR04M_2 driver(Config::Pins::kTrigPin, Config::Pins::kEchoPin);
 
     [[noreturn]] static void Task(void* pvParameters)
     {

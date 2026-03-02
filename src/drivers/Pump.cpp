@@ -6,7 +6,7 @@
 
 namespace CE::Drivers
 {
-    const char* Pump::TAG = "PumpDriver";
+    const char* Pump::TAG = "Pump-Driver";
 
     Pump::Pump(const byte switchPin, const byte ledPin, const byte trigPin)
         : switchPin_(switchPin), led_(ledPin), trig_(trigPin), state(false)

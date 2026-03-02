@@ -2,21 +2,21 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <drivers/Radar.h>
+#include <drivers/JSN-SR04M-2.h>
 #include <Services/Settings.h>
 #include "domain/Global.hpp"
 
 namespace CE::Drivers
 {
-    const char* Radar::TAG = "RadarDriver";
+    const char* JSN_SR04M_2::TAG = "JSN_SR04M_2-Driver";
 
-    Radar::Radar(byte trigPin, byte echoPin)
+    JSN_SR04M_2::JSN_SR04M_2(byte trigPin, byte echoPin)
       : trig_(trigPin), echo_(echoPin)
     {
         ESP_LOGV(TAG, "Constructor");
     }
 
-    void Radar::Setup() const
+    void JSN_SR04M_2::Setup() const
     {
         ESP_LOGV(TAG, "Setup");
 
@@ -25,7 +25,7 @@ namespace CE::Drivers
         digitalWrite(trig_, HIGH);
     }
 
-    bool Radar::ReadDistanceCm(unsigned short& out_cm) const
+    bool JSN_SR04M_2::ReadDistanceCm(unsigned short& out_cm) const
     {
         ESP_LOGV(TAG, "ReadDistanceCm");
 

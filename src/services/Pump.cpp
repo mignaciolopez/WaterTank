@@ -16,12 +16,12 @@ namespace CE::Services::Pump
         ESP_LOGV(TAG, "Task");
         while (true)
         {
-            unsigned short filteredDistance = 0;
-            if (Filter::TryGetLatestFilteredCm(filteredDistance))
+            unsigned short medianDistance = 0;
+            if (Filter::TryGetLatestFilteredCm(medianDistance))
             {
-                ESP_LOGI(TAG, "Median Distance: %.1fcm.", filteredDistance / 100.0f);
-                ESP_LOGI(TAG, "Water Level State: %s", WaterLevel::GetWaterLevelString(filteredDistance / 100u));
-                const auto status = WaterLevel::GetWaterLevelState(filteredDistance / 100u);
+                ESP_LOGI(TAG, "Median Distance: %.1fcm.", medianDistance / 100.0f);
+                ESP_LOGI(TAG, "Water Level State: %s", WaterLevel::GetWaterLevelString(medianDistance / 100u));
+                const auto status = WaterLevel::GetWaterLevelState(medianDistance / 100u);
                 switch (status)
                 {
                     case WaterLevel::Invalid:

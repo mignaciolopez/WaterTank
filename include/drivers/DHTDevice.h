@@ -8,23 +8,21 @@
 
 namespace CE::Drivers
 {
-    class Weather
+    class DHTDevice
     {
     public:
         static const char* TAG;
-        Weather(const int pin, const int type) : dht_(pin, type) {}
+        DHTDevice(byte pin, byte type);
 
-        void Setup()
-        {
-            ESP_LOGV(TAG, "Setup");
-            dht_.begin();
-        }
+        bool Setup();
 
         // Returns true when read is valid.
         bool Read(Domain::WeatherSample& out);
 
     private:
         DHT dht_;
+        byte pin_;
+        byte type_;
     };
 
 } // namespace CE::Drivers
