@@ -4,11 +4,24 @@
 
 #pragma once
 
-namespace CE::Services::Filter
+#include "os/Queues.hpp"
+
+namespace CE::Services
 {
-    static auto TAG = "FilterService";
+    class Filter
+    {
+    public:
+        static const char* TAG;
+        static QueueHandle_t gMedianDistanceQueue;
 
-    [[nodiscard]] bool Setup();
-    bool TryGetLatestFilteredCm(unsigned short& out_cm);
+        Filter();
+        [[nodiscard]] static bool Setup();
 
-} // namespace CE::Services::Filter
+        static bool TryGetLatestFilteredCm(unsigned short& out_cm);
+
+    private:
+        [[noreturn]] static void Task(void* pvParameters);
+        static unsigned short MedianInPlace(unsigned short* buf, std::size_t n);
+    };
+
+}   // namespace CE::Services

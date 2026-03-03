@@ -7,11 +7,11 @@
 
 namespace CE::Drivers
 {
-    class Pump
+    class Relay
     {
     public:
         static const char* TAG;
-        Pump(byte switchPin, byte ledPin, byte trigPin);
+        Relay(byte switchPin, byte ledPin, byte trigPin);
 
         [[nodiscard]] bool Setup() const;
 

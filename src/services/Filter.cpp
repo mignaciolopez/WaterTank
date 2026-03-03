@@ -3,7 +3,7 @@
 //
 
 #include <services/Filter.h>
-#include <services/Settings.h>
+#include <os/Settings.h>
 #include <services/Radar.h>
 #include <config/BuildConfig.hpp>
 #include <os/Queues.hpp>
@@ -11,15 +11,33 @@
 #include <os/Time.hpp>
 #include <array>
 #include <algorithm>
-#include <cstddef>
 
 #include "domain/Global.hpp"
+#include "services/Watchdog.h"
 
-namespace CE::Services::Filter
+using namespace CE::OS;
+
+namespace CE::Services
 {
-    static QueueHandle_t g_queue = nullptr;
+    const char* Filter::TAG = "Filter-Service";
+    QueueHandle_t Filter::gMedianDistanceQueue = nullptr;
 
-    static unsigned short MedianInPlace(unsigned short* buf, const std::size_t n)
+    Filter::Filter() = default;
+
+    bool Filter::Setup()
+    {
+        ESP_LOGV(TAG, "Setup");
+        gMedianDistanceQueue = OS::Queues::CreateLatestQueue(sizeof(unsigned short));
+        if (!gMedianDistanceQueue)
+            return false;
+
+        const bool taskResult = OS::Tasks::Start(Task, TAG, Config::Build::kStackFilterTask, nullptr, Config::Build::kPrioFilter, nullptr);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelay_ms);
+
+        return taskResult && watchdogResult;
+    }
+
+    unsigned short Filter::MedianInPlace(unsigned short* buf, const std::size_t n)
     {
         ESP_LOGV(TAG, "MedianInPlace");
         // For small n, nth_element is efficient and avoids full sort.
@@ -28,7 +46,7 @@ namespace CE::Services::Filter
         return *mid;
     }
 
-    [[noreturn]] static void Task(void*)
+    void Filter::Task(void*)
     {
         ESP_LOGV(TAG, "Task");
 
@@ -38,14 +56,13 @@ namespace CE::Services::Filter
 
         while (true)
         {
-            const auto& s = Settings::Get();
-            const std::size_t winSize = std::min<std::size_t>(s.medianWindow, window.size());
+            const std::size_t winSize = std::min<std::size_t>(Settings::Get().medianWindow, window.size());
             ESP_LOGD(TAG, "winSize=%d", winSize);
 
             unsigned short raw = 0;
             if (Radar::TryGetLatestRawCm(raw))
             {
-                if (raw > 0 && raw < s.height_cm * 100 && winSize >= 3)
+                if (raw > 0 && raw < Settings::Get().height_cm * 100 && winSize >= 3)
                 {
                     window[index] = raw;
                     index = (index + 1) % winSize;
@@ -57,37 +74,29 @@ namespace CE::Services::Filter
                         // copy to temp for median (nth_element mutates)
                         std::array<unsigned short, Config::Build::kMedianMaxWindow> tmp = window;
                         unsigned short filtered = MedianInPlace(tmp.data(), winSize) + Domain::kFilteredDistanceOffset;
-                        OS::Queues::Overwrite(g_queue, filtered);
+                        OS::Queues::Overwrite(gMedianDistanceQueue, filtered);
                         ESP_LOGD(TAG, "filtered_cm=%.2f", filtered / 100.0f);
                     }
                 }
             }
             else
             {
-                ESP_LOGW(TAG, "Radar::TryGetLatestRawCm Failed!");
+                ESP_LOGE(TAG, "Radar::TryGetLatestRawCm Failed!");
+                Watchdog::ReportError(Domain::ErrorSeverity::Error, Domain::ErrorType::SensorFailure, TAG, "Radar::TryGetLatestRawCm Failed!");
             }
 
-            OS::Time::SleepMs(s.radarDelay_ms);
+            Watchdog::NotifyTaskAlive(TAG);
+            OS::Time::SleepMs(Settings::Get().radarDelay_ms);
         }
     }
 
-    bool Setup()
-    {
-        ESP_LOGV(TAG, "Setup");
-      g_queue = OS::Queues::CreateLatestQueue(sizeof(unsigned short));
-      if (!g_queue)
-          return false;
-
-      return OS::Tasks::Start(Task, TAG, Config::Build::kStackFilterTask, nullptr, Config::Build::kPrioFilter, nullptr);
-    }
-
-    bool TryGetLatestFilteredCm(unsigned short& out_cm)
+    bool Filter::TryGetLatestFilteredCm(unsigned short& out_cm)
     {
         ESP_LOGV(TAG, "TryGetLatestFilteredCm");
-      if (!g_queue)
-          return false;
+        if (!gMedianDistanceQueue)
+            return false;
 
-      return OS::Queues::Receive(g_queue, out_cm, 0);
+        return OS::Queues::Receive(gMedianDistanceQueue, out_cm, 0);
     }
 
-} // namespace CE::Services::FilterService
+}   // namespace CE::Services

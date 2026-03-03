@@ -1,10 +1,14 @@
 ﻿//
-// Created by lmart on 2/28/2026.
+// Created by lmartinignacio@gmail.com on 2/28/2026.
 //
 
 #include <Arduino.h>
-#include <Services/Settings.h>
+#include <os/Settings.h>
 #include <services/WaterLevel.h>
+
+#include "services/Watchdog.h"
+
+using namespace CE::OS;
 
 namespace CE::Services::WaterLevel
 {
@@ -14,6 +18,9 @@ namespace CE::Services::WaterLevel
         if (distance > s.height_cm)
         {
             ESP_LOGE(TAG, "Distance %ucm is higher than configured water tank height: %ucm", distance, s.height_cm);
+            char msg[128];
+            snprintf(msg, sizeof(msg), "Measured distance %ucm is higher than configured water tank height: %ucm", distance, s.height_cm);
+            Watchdog::ReportError(Domain::ErrorSeverity::Critical, Domain::ErrorType::ConfigError, TAG, msg);
             return Invalid;
         }
 

@@ -2,64 +2,89 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <services/Weather.h>
-#include <services/Settings.h>
+#include <config/BuildConfig.hpp>
 #include <config/Pins.hpp>
+
+#include <domain/Global.hpp>
+
 #include <os/Queues.hpp>
+#include <os/Settings.h>
 #include <os/Tasks.hpp>
 #include <os/Time.hpp>
-#include <config/BuildConfig.hpp>
 
-#include "domain/Global.hpp"
+#include <services/Watchdog.h>
+#include <services/Weather.h>
 
-namespace CE::Services::Weather
+
+using namespace CE::OS;
+using namespace CE::Config;
+
+namespace CE::Services
 {
-    static QueueHandle_t g_queue = nullptr;
+    const char* Weather::TAG = "Weather-Service";
+    QueueHandle_t Weather::gWeatherQueue = nullptr;
+    Drivers::DHTDevice* Weather::driver_ = nullptr;
 
-    [[noreturn]] static void Task(void*)
+    Weather::Weather() = default;
+
+    bool Weather::Setup()
+    {
+        ESP_LOGV(TAG, "Setup");
+        gWeatherQueue = Queues::CreateLatestQueue(sizeof(Domain::WeatherSample));
+        if (!gWeatherQueue)
+            return false;
+
+        if (!driver_)
+            driver_ = new Drivers::DHTDevice(Pins::kDhtPin, Pins::kDhtType);
+
+        driver_->Setup();
+
+        const bool taskResult = Tasks::Start(Task, TAG, Build::kStackWeatherTask, nullptr, Build::kPrioWeather, nullptr);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().weatherDelay_ms);
+        return taskResult && watchdogResult;
+    }
+
+    [[noreturn]] void Weather::Task(void*)
     {
         ESP_LOGV(TAG, "Task");
 
         while (true)
         {
-            const auto& s = Settings::Get();
-
             Domain::WeatherSample sample{};
-            if (driver.Read(sample))
+            if (driver_->Read(sample))
             {
                 Domain::g_speed_m_per_s = 331.3f + 0.606f * sample.heatIndexC;
                 Domain::g_speed_cm_per_us = Domain::g_speed_m_per_s / 10000.0f;
 
-                OS::Queues::Overwrite(g_queue, sample);
+                Queues::Overwrite(gWeatherQueue, sample);
             }
             else
             {
-                ESP_LOGD(TAG, "Weather read invalid");
+                ESP_LOGE(TAG, "Weather read invalid");
+                Watchdog::ReportError(Domain::ErrorSeverity::Warning, Domain::ErrorType::SensorFailure, TAG, "Weather read invalid");
             }
 
-            OS::Time::SleepMs(s.weatherDelay_ms);
+            Watchdog::NotifyTaskAlive(TAG);
+            OS::Time::SleepMs(Settings::Get().weatherDelay_ms);
         }
     }
 
-    bool Setup()
-    {
-        ESP_LOGV(TAG, "Setup");
-        g_queue = OS::Queues::CreateLatestQueue(sizeof(Domain::WeatherSample));
-        if (!g_queue)
-            return false;
-
-        driver.Setup();
-
-        return OS::Tasks::Start(Task, TAG, Config::Build::kStackWeatherTask, nullptr, Config::Build::kPrioWeather, nullptr);
-    }
-
-    bool TryGetLatest(Domain::WeatherSample& out)
+    bool Weather::TryGetLatest(Domain::WeatherSample& out)
     {
         ESP_LOGV(TAG, "TryGetLatest");
-        if (!g_queue)
+        if (!gWeatherQueue)
             return false;
 
-        return OS::Queues::Receive(g_queue, out, 0);
+        return Queues::Receive(gWeatherQueue, out, 0);
     }
 
-} // namespace CE::Services::WeatherService
+    bool Weather::ReadLast(Domain::WeatherSample& out)
+    {
+        ESP_LOGV(TAG, "TryGetLatest");
+        if (!gWeatherQueue)
+            return false;
+
+        return Queues::Peek(gWeatherQueue, out);
+    }
+
+}   // namespace CE::Services

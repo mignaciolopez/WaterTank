@@ -3,12 +3,25 @@
 //
 
 #pragma once
+#include "drivers/JSN-SR04M-2.h"
 
-namespace CE::Services::Radar
+namespace CE::Services
 {
-    static auto TAG = "RadarService";
+    class Radar
+    {
+    public:
+        static const char* TAG;
+        static QueueHandle_t gRadarQueue;
 
-    [[nodiscard]] bool Setup();
-    bool TryGetLatestRawCm(unsigned short& out_cm);
+        Radar();
+        [[nodiscard]] static bool Setup();
 
-} // namespace CE::Services::Radar
+        static bool TryGetLatestRawCm(unsigned short& out_cm);
+
+    private:
+        [[noreturn]] static void Task(void* pvParameters);
+
+        static Drivers::JSN_SR04M_2* driver_;
+    };
+
+}   // namespace CE::Services

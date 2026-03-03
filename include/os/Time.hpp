@@ -20,20 +20,20 @@ namespace CE::OS::Time
         vTaskDelay(MsToTicks(ms));
     }
 
-    inline time_t GetCurrentTime()
+    inline time_t Get()
     {
         return time(nullptr);
     }
 
     inline tm GetLocalTime()
     {
-        const time_t now = GetCurrentTime();
+        const time_t now = Get();
         tm timeInfo = {};
         localtime_r(&now, &timeInfo);
         return timeInfo;
     }
 
-    inline bool IsSleepTime(const uint8_t nightStartHour = 22, const uint8_t nightEndHour = 8)
+    inline bool IsNightTime(const uint8_t nightStartHour = 22, const uint8_t nightEndHour = 8)
     {
         const tm timeInfo = GetLocalTime();
         const uint8_t hour = timeInfo.tm_hour;
@@ -50,17 +50,17 @@ namespace CE::OS::Time
         }
     }
 
-    inline void FormatTime(char* buffer, size_t size, const char* format = "%Y-%m-%d %H:%M:%S")
+    inline void FormatTime(char* buffer, size_t size, const char* format = "%Y/%m/%d %H:%M:%S")
     {
         tm timeInfo = GetLocalTime();
         strftime(buffer, size, format, &timeInfo);
     }
 
-    inline const char* GetFormattedTime(const char* format = "%Y-%m-%d %H:%M:%S")
+    inline const char* GetFormattedTime(const char* format = "%Y/%m/%d %H:%M:%S")
     {
         static char buffer[64];
         FormatTime(buffer, sizeof(buffer), format);
         return buffer;
     }
 
-} // namespace CE::OS::Time
+}   // namespace CE::OS::Time

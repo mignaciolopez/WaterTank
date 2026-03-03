@@ -19,4 +19,4 @@ namespace CE::OS::Tasks
         return xTaskCreate(fn, name, stackBytes, param, prio, outHandle) == pdPASS;
     }
 
-} // namespace CE::OS::Tasks
+}   // namespace CE::OS::Tasks

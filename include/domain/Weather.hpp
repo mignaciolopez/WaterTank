@@ -13,4 +13,4 @@ namespace CE::Domain
         float heatIndexC = 0;
     };
 
-} // namespace CE::Domain
+}   // namespace CE::Domain

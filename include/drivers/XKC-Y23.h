@@ -21,4 +21,4 @@ namespace CE::Drivers
         byte pullupPin_;
     };
 
-} // namespace CE::Drivers
+}   // namespace CE::Drivers

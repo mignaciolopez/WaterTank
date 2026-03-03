@@ -1,5 +1,5 @@
 ﻿//
-// Created by lmart on 2/28/2026.
+// Created by lmartinignacio@gmail.com on 2/28/2026.
 //
 
 #pragma once
@@ -22,4 +22,4 @@ namespace CE::Services::WaterLevel
 
     const char* StatusToString(WaterLevel status);
 
-} // namespace CE::Services::Filter
+}   // namespace CE::Services::WaterLevel

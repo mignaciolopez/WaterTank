@@ -26,4 +26,4 @@ namespace CE::Drivers
         return digitalRead(pullupPin_) == LOW;
     }
 
-} // namespace CE::Drivers
+}   // namespace CE::Drivers

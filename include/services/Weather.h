@@ -3,18 +3,27 @@
 //
 
 #pragma once
-#include "config/Pins.hpp"
+#include <Arduino.h>
 #include <domain/Weather.hpp>
 #include <drivers/DHTDevice.h>
 
-
-namespace CE::Services::Weather
+namespace CE::Services
 {
-    static auto TAG = "Weather-Service";
+    class Weather
+    {
+    public:
+        static const char* TAG;
+        static QueueHandle_t gWeatherQueue;
 
-    Drivers::DHTDevice driver(Config::Pins::kDhtPin, DHT11);
+        Weather();
+        [[nodiscard]] static bool Setup();
 
-    [[nodiscard]] bool Setup();
-    bool TryGetLatest(Domain::WeatherSample& out);
+        static bool TryGetLatest(Domain::WeatherSample& out);
+        static bool ReadLast(Domain::WeatherSample& out);
 
-} // namespace CE::Services::Weather
+    private:
+        [[noreturn]] static void Task(void* pvParameters);
+
+        static Drivers::DHTDevice* driver_;
+    };
+}   // namespace CE::Services

@@ -25,4 +25,4 @@ namespace CE::Drivers
         byte type_;
     };
 
-} // namespace CE::Drivers
+}   // namespace CE::Drivers

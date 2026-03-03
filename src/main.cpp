@@ -2,7 +2,8 @@
 #include <app/App.hpp>
 #include "config/BuildConfig.hpp"
 #include <config/Pins.hpp>
-#include <esp_log.h>
+
+#include "os/Log.hpp"
 
 using namespace CE;
 
@@ -16,7 +17,7 @@ void setup()
     digitalWrite(Config::Pins::kBlueLed, Config::Build::kLedOn);
 
     Serial.begin(921600);
-    esp_log_level_set("*", ESP_LOG_VERBOSE);
+    OS::Log::set("*", ESP_LOG_VERBOSE);
 
     delay(500);
     ESP_LOGI(TAG, "Boot");
@@ -39,5 +40,4 @@ void setup()
 void loop()
 {
     App::Loop();
-    delay(10000);
 }

@@ -17,6 +17,7 @@ namespace CE::Drivers
     bool DHTDevice::Setup()
     {
         ESP_LOGV(TAG, "Setup");
+        pinMode(pin_, INPUT);
         dht_.begin();
 
         return true;
@@ -24,7 +25,7 @@ namespace CE::Drivers
 
     bool DHTDevice::Read(Domain::WeatherSample& out)
     {
-        ESP_LOGV(TAG, "Reading DHT Device: %c on %c", type_, pin_);
+        ESP_LOGV(TAG, "Reading DHT%d on PIN %d", type_, pin_);
 
         out.humidity = dht_.readHumidity(true);
         out.tempC = dht_.readTemperature(false, true);
@@ -40,4 +41,4 @@ namespace CE::Drivers
         return true;
     }
 
-} // namespace CE::Drivers
+}   // namespace CE::Drivers

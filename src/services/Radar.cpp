@@ -2,63 +2,75 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <services/Radar.h>
-#include <services/Settings.h>
-#include <services/Weather.h>
-#include <drivers/JSN-SR04M-2.h>
-#include <config/Pins.hpp>
 #include <config/BuildConfig.hpp>
+#include "config/Pins.hpp"
+#include <drivers/JSN-SR04M-2.h>
 #include <os/Queues.hpp>
 #include <os/Tasks.hpp>
 #include <os/Time.hpp>
+#include <services/Radar.h>
+#include <os/Settings.h>
 
-namespace CE::Services::Radar
+#include "services/Watchdog.h"
+
+using namespace CE::OS;
+
+namespace CE::Services
 {
-    static QueueHandle_t g_queue = nullptr;
+    const char* Radar::TAG = "Radar-Service";
+    QueueHandle_t Radar::gRadarQueue = nullptr;
+    Drivers::JSN_SR04M_2* Radar::driver_ = nullptr;
 
-    const Drivers::JSN_SR04M_2 driver(Config::Pins::kTrigPin, Config::Pins::kEchoPin);
+    Radar::Radar() = default;
 
-    [[noreturn]] static void Task(void* pvParameters)
+    bool Radar::Setup()
+    {
+        ESP_LOGV(TAG, "Setup");
+        gRadarQueue = OS::Queues::CreateLatestQueue(sizeof(unsigned short));
+        if (!gRadarQueue)
+            return false;
+
+        if (!driver_)
+            driver_ = new Drivers::JSN_SR04M_2(Config::Pins::kTrigPin, Config::Pins::kEchoPin);
+
+        driver_->Setup();
+
+        const bool taskResult = OS::Tasks::Start(Task, TAG, Config::Build::kStackRadarTask, nullptr, Config::Build::kPrioRadar, nullptr);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelay_ms);
+
+        return taskResult && watchdogResult;
+    }
+
+    void Radar::Task(void*)
     {
         ESP_LOGV(TAG, "Task");
+
         while (true)
         {
-            const auto& settings = Settings::Get();
-
             unsigned short cm = 0;
-            if (driver.ReadDistanceCm(cm))
+            if (driver_->ReadDistanceCm(cm))
             {
-                OS::Queues::Overwrite(g_queue, cm);
+                OS::Queues::Overwrite(gRadarQueue, cm);
                 ESP_LOGD(TAG, "raw_cm=%.2f", cm / 100.0f);
             }
             else
             {
                 ESP_LOGD(TAG, "timeout/no-echo");
+                Watchdog::ReportError(Domain::ErrorSeverity::Warning, Domain::ErrorType::SensorFailure, TAG, "timeout/no-echo");
             }
 
-            OS::Time::SleepMs(settings.radarDelay_ms);
+            Watchdog::NotifyTaskAlive(TAG);
+            OS::Time::SleepMs(Settings::Get().radarDelay_ms);
         }
     }
 
-    bool Setup()
-    {
-        ESP_LOGV(TAG, "Setup");
-        g_queue = OS::Queues::CreateLatestQueue(sizeof(unsigned short));
-        if (!g_queue)
-            return false;
-
-        driver.Setup();
-
-        return OS::Tasks::Start(Task, TAG, Config::Build::kStackRadarTask, nullptr, Config::Build::kPrioRadar, nullptr);
-    }
-
-    bool TryGetLatestRawCm(unsigned short& out_cm)
+    bool Radar::TryGetLatestRawCm(unsigned short& out_cm)
     {
         ESP_LOGV(TAG, "TryGetLatestRawCm");
-        if (!g_queue)
+        if (!gRadarQueue)
             return false;
 
-        return OS::Queues::Receive(g_queue, out_cm, 0);
+        return OS::Queues::Receive(gRadarQueue, out_cm, 0);
     }
 
-} // namespace CE::Services::RadarService
+}   // namespace CE::Services

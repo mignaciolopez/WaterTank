@@ -4,21 +4,28 @@
 
 #pragma once
 
-#include <Services/NTP.hpp>
+#include <SPIFFS.h>
 #include <services/Filter.h>
+#include <Services/NTP.hpp>
 #include "services/Pump.h"
 #include <services/Radar.h>
-#include <services/Settings.h>
+#include <os/Settings.h>
+#include <services/Watchdog.h>
 #include <services/Weather.h>
 #include "services/WiFi.hpp"
 
 namespace CE::App
 {
-    static const char* TAG = "App";
+    static auto TAG = "App";
 
     inline bool Setup()
     {
-        if (!Services::Settings::Setup())
+        if (!SPIFFS.begin(true)) {
+            ESP_LOGE(TAG, "SPIFFS Mount Failed");
+            return false;
+        }
+
+        if (!OS::Settings::Setup())
         {
             ESP_LOGE(TAG, "Settings Setup failed");
             return false;
@@ -33,6 +40,12 @@ namespace CE::App
         if (!Services::NTP::Setup())
         {
             ESP_LOGE(TAG, "NTP Setup failed");
+            return false;
+        }
+
+        if (!Services::Watchdog::Setup())
+        {
+            ESP_LOGE(TAG, "Watchdog Setup failed");
             return false;
         }
 
@@ -67,10 +80,11 @@ namespace CE::App
     inline void Loop()
     {
         Domain::WeatherSample sample = {};
-        if (Services::Weather::TryGetLatest(sample))
+        if (Services::Weather::ReadLast(sample))
         {
             ESP_LOGI(TAG, "Humidity: %.1f%% Temperature: %.1f°C Heat: %.1f°C.", sample.humidity, sample.tempC, sample.heatIndexC);
         }
+        delay(OS::Settings::Get().weatherDelay_ms);
     }
 
-} // namespace CE::App
+}   // namespace CE::App

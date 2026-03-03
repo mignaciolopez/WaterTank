@@ -2,19 +2,19 @@
 // Created by lmartinignacio@gmail.com on 2/28/2026.
 //
 
-#include <drivers/Pump.h>
+#include <drivers/Relay.h>
 
 namespace CE::Drivers
 {
-    const char* Pump::TAG = "Pump-Driver";
+    const char* Relay::TAG = "Pump-Driver";
 
-    Pump::Pump(const byte switchPin, const byte ledPin, const byte trigPin)
+    Relay::Relay(const byte switchPin, const byte ledPin, const byte trigPin)
         : switchPin_(switchPin), led_(ledPin), trig_(trigPin), state(false)
     {
         ESP_LOGV(TAG, "Constructor");
     }
 
-    bool Pump::Setup() const
+    bool Relay::Setup() const
     {
         ESP_LOGV(TAG, "Setup");
 
@@ -28,7 +28,7 @@ namespace CE::Drivers
         return true;
     }
 
-    void Pump::SwitchOn()
+    void Relay::SwitchOn()
     {
         ESP_LOGV(TAG, "SwitchOn");
         digitalWrite(led_, HIGH);
@@ -36,7 +36,7 @@ namespace CE::Drivers
         state = true;
     }
 
-    void Pump::SwitchOff()
+    void Relay::SwitchOff()
     {
         ESP_LOGV(TAG, "SwitchOff");
         digitalWrite(switchPin_, LOW);
@@ -44,7 +44,7 @@ namespace CE::Drivers
         state = false;
     }
 
-    bool Pump::IsOn() const
+    bool Relay::IsOn() const
     {
         return state;
     }

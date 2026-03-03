@@ -15,15 +15,48 @@ namespace CE::OS::Queues
     }
 
     template <typename T>
-    inline bool Overwrite(const QueueHandle_t q, const T& value)
+    inline bool Overwrite(QueueHandle_t q, const T& value)
     {
         return xQueueOverwrite(q, &value) == pdTRUE;
     }
 
     template <typename T>
-    inline bool Receive(const QueueHandle_t q, T& out, const TickType_t wait = portMAX_DELAY)
+    inline bool Receive(QueueHandle_t q, T& out, const TickType_t wait = portMAX_DELAY)
     {
         return xQueueReceive(q, &out, wait) == pdTRUE;
     }
 
-} // namespace CE::OS::Queues
+    // Creates a queue with specified length for multi-item storage.
+    template <typename T>
+    inline QueueHandle_t CreateQueue(const std::size_t length)
+    {
+        return xQueueCreate(length, sizeof(T));
+    }
+
+    // Sends (pushes) an item to the back of the queue.
+    template <typename T>
+    inline bool Send(QueueHandle_t q, const T& value, const TickType_t wait = portMAX_DELAY)
+    {
+        return xQueueSend(q, &value, wait) == pdTRUE;
+    }
+
+    // Peeks at the front item without removing it from the queue.
+    template <typename T>
+    inline bool Peek(QueueHandle_t q, T& out, const TickType_t wait = 0)
+    {
+        return xQueuePeek(q, &out, wait) == pdTRUE;
+    }
+
+    // Gets the number of items currently in the queue.
+    inline UBaseType_t GetCount(QueueHandle_t q)
+    {
+        return uxQueueMessagesWaiting(q);
+    }
+
+    // Gets the number of free spaces in the queue.
+    inline UBaseType_t GetAvailableSpaces(QueueHandle_t q)
+    {
+        return uxQueueSpacesAvailable(q);
+    }
+
+}   // namespace CE::OS::Queues

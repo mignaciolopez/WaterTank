@@ -1,18 +1,38 @@
 ﻿//
-// Created by lmart on 2/28/2026.
+// Created by lmartinignacio@gmail.com on 2/28/2026.
 //
 
 #pragma once
 
-#include "config/Pins.hpp"
-#include "drivers/Pump.h"
+#include "domain/States.hpp"
+#include "drivers/Relay.h"
+#include "os/PersistentState.hpp"
 
-namespace CE::Services::Pump
+namespace CE::Services
 {
-    static auto TAG = "PumpService";
+    class Pump
+    {
+    public:
+        static const char* TAG;
 
-    static Drivers::Pump driver(Config::Pins::kPumpSwitchPin, Config::Pins::kPumpLedPin, Config::Pins::kPumpTrigPin);
+        Pump();
+        [[nodiscard]] static bool Setup();
 
-    [[nodiscard]] bool Setup();
+        static void SwitchOn();
+        static void SwitchOff();
 
-} // namespace CE::Services::Filter
+    private:
+        [[noreturn]] static void Task(void* pvParameters);
+
+        static void MonitorTimeOn();
+        static void MonitorCooldown();
+
+        static Domain::States::Pump state_;
+        static OS::PersistentState<Domain::States::Pump> persistent_;
+
+        static Drivers::Relay* driver_;
+        static bool isOn_;
+
+    };
+
+}   // namespace CE::Services

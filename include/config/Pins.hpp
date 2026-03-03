@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#include <Arduino.h>
+#include "DHT.h"
 
 namespace CE::Config::Pins
 {
@@ -17,6 +19,7 @@ namespace CE::Config::Pins
 
     // DHT
     static constexpr byte kDhtPin = 3;
+    static constexpr byte kDhtType = DHT11;
 
     // Ultrasonic
     static constexpr byte kTrigPin = 4;

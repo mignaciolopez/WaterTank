@@ -7,6 +7,8 @@
 
 namespace CE::OS::Log
 {
-    // Simple place for log-related helpers later.
-    // For now, just keep tags and levels in modules.
-} // namespace CE::OS::Log
+    static void set(const char* TAG, esp_log_level_t level)
+    {
+        esp_log_level_set(TAG, level);
+    }
+}   // namespace CE::OS::Log

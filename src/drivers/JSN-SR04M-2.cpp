@@ -2,15 +2,15 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <drivers/JSN-SR04M-2.h>
-#include <Services/Settings.h>
 #include "domain/Global.hpp"
+#include <drivers/JSN-SR04M-2.h>
+#include <os/Settings.h>
 
 namespace CE::Drivers
 {
     const char* JSN_SR04M_2::TAG = "JSN_SR04M_2-Driver";
 
-    JSN_SR04M_2::JSN_SR04M_2(byte trigPin, byte echoPin)
+    JSN_SR04M_2::JSN_SR04M_2(const byte trigPin, const byte echoPin)
       : trig_(trigPin), echo_(echoPin)
     {
         ESP_LOGV(TAG, "Constructor");
@@ -23,6 +23,7 @@ namespace CE::Drivers
         pinMode(trig_, OUTPUT);
         pinMode(echo_, INPUT);
         digitalWrite(trig_, HIGH);
+        delay(1000);
     }
 
     bool JSN_SR04M_2::ReadDistanceCm(unsigned short& out_cm) const
@@ -30,7 +31,7 @@ namespace CE::Drivers
         ESP_LOGV(TAG, "ReadDistanceCm");
 
         // Timeout prevents blocking forever
-        const auto timeout = static_cast<unsigned long>(static_cast<float>(Services::Settings::Get().height_cm)  * 2 / Domain::g_speed_cm_per_us);
+        const auto timeout = static_cast<unsigned long>(static_cast<float>(OS::Settings::Get().height_cm)  * 2 / Domain::g_speed_cm_per_us);
         ESP_LOGD(TAG, "timeout_us=%u", timeout);
 
         unsigned long duration_us = 0;
@@ -54,4 +55,4 @@ namespace CE::Drivers
         return true;
     }
 
-} // namespace CE::Drivers
+}   // namespace CE::Drivers

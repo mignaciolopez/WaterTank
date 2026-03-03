@@ -10,32 +10,36 @@
 namespace CE::Config::Build
 {
 #if CONFIG_IDF_TARGET_ESP32C3
-    static constexpr std::size_t kLedOn = LOW;
-    static constexpr std::size_t kLedOff = HIGH;
+    static constexpr byte kLedOn = LOW;
+    static constexpr byte kLedOff = HIGH;
 #elif CONFIG_IDF_TARGET_ESP32
-    static constexpr std::size_t kBlueLedOn = HIGH;
-    static constexpr std::size_t kBlueLedOff = LOW;
+    static constexpr byte kBlueLedOn = HIGH;
+    static constexpr byte kBlueLedOff = LOW;
 #else
-    static constexpr std::size_t kBlueLedOn = HIGH;
-    static constexpr std::size_t kBlueLedOff = LOW;
+    static constexpr byte kBlueLedOn = HIGH;
+    static constexpr byte kBlueLedOff = LOW;
 #endif
 
     // Logging
     static constexpr bool kLogStackHighWatermark = false; // set true only for debugging
 
     // Filter limits (avoid dynamic memory and VLAs)
-    static constexpr std::size_t kMedianMaxWindow = 10U;
+    static constexpr byte kMedianMaxWindow = 10U;
 
     // Task stacks (tune as needed)
-    static constexpr uint32_t kStackWeatherTask = 4096;
-    static constexpr uint32_t kStackRadarTask   = 4096;
-    static constexpr uint32_t kStackFilterTask  = 4096;
-    static constexpr uint32_t kStackPumpTask    = 4096;
+    static constexpr unsigned short kStackWeatherTask   = 24576;
+    static constexpr unsigned short kStackRadarTask     = 24576;
+    static constexpr unsigned short kStackFilterTask    = 24576;
+    static constexpr unsigned short kStackPumpTask      = 24576;
+    static constexpr unsigned short kStackWatchdogTask  = 8192;
 
     // Task priorities
-    static constexpr UBaseType_t kPrioWeather   = 2;
-    static constexpr UBaseType_t kPrioRadar     = 2;
-    static constexpr UBaseType_t kPrioFilter    = 2;
-    static constexpr UBaseType_t kPrioPump      = 3;
+    static constexpr byte kPrioWeather   = 2;
+    static constexpr byte kPrioRadar     = 2;
+    static constexpr byte kPrioFilter    = 1;
+    static constexpr byte kPrioPump      = 3;
+    static constexpr byte kPrioWatchdog  = 1;
 
-} // namespace CE::config::Build
+    static constexpr byte kWatchdogMaxMissedNotifies = 5;
+
+}   // namespace CE::config::Build

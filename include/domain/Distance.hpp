@@ -12,4 +12,4 @@ namespace CE::Domain
         unsigned short filtered_cm = 0;
     };
 
-} // namespace CE::Domain
+}   // namespace CE::Domain
