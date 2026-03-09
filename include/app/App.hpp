@@ -84,7 +84,7 @@ namespace CE::App
         {
             ESP_LOGI(TAG, "Humidity: %.1f%% Temperature: %.1f°C Heat: %.1f°C.", sample.humidity, sample.tempC, sample.heatIndexC);
         }
-        delay(OS::Settings::Get().weatherDelay_ms);
+        delay(OS::Settings::Get().weatherDelay_s * 1000);
     }
 
 }   // namespace CE::App

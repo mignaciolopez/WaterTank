@@ -37,8 +37,8 @@ namespace CE::Services
 
         persistent_.Read();
 
-        const bool taskResult = OS::Tasks::Start(Task, TAG, Config::Build::kStackPumpTask, nullptr, Config::Build::kPrioPump, nullptr);
-        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelay_ms);
+        const bool taskResult = Tasks::Start(Task, TAG, Config::Build::kStackPumpTask, nullptr, Config::Build::kPrioPump, nullptr);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelay_s * 1000);
 
         return taskResult && watchdogResult;
     }
@@ -47,7 +47,7 @@ namespace CE::Services
     {
         if (!isOn_ && !state_.isOnCooldown_)
         {
-            Settings::Get().radarDelay_ms = 1000u;
+            Settings::Get().radarDelay_s = 1u;
             state_.timeStampOn_ = Time::Get();
             ESP_LOGI(TAG, "Pump turned ON at: %s", OS::Time::GetFormattedTime());
             driver_->SwitchOn();
@@ -60,7 +60,7 @@ namespace CE::Services
     {
         if (isOn_)
         {
-            if (!Settings::Load()) Settings::Get().radarDelay_ms = 30000u;
+            if (!Settings::Load()) Settings::Get().radarDelay_s = 30u;
             ESP_LOGI(TAG, "Pump turned OFF at: %s", OS::Time::GetFormattedTime());
             driver_->SwitchOff();
             isOn_ = false;
@@ -115,7 +115,7 @@ namespace CE::Services
             MonitorCooldown();
             MonitorTimeOn();
             Watchdog::NotifyTaskAlive(TAG);
-            Time::SleepMs(Settings::Get().radarDelay_ms);
+            Time::SleepMs(Settings::Get().radarDelay_s * 1000);
         }
     }
 

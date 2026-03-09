@@ -32,7 +32,7 @@ namespace CE::Services
             return false;
 
         const bool taskResult = OS::Tasks::Start(Task, TAG, Config::Build::kStackFilterTask, nullptr, Config::Build::kPrioFilter, nullptr);
-        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelay_ms);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelay_s * 1000);
 
         return taskResult && watchdogResult;
     }
@@ -86,7 +86,7 @@ namespace CE::Services
             }
 
             Watchdog::NotifyTaskAlive(TAG);
-            OS::Time::SleepMs(Settings::Get().radarDelay_ms);
+            Time::SleepMs(Settings::Get().radarDelay_s * 1000);
         }
     }
 
@@ -96,7 +96,7 @@ namespace CE::Services
         if (!gMedianDistanceQueue)
             return false;
 
-        return OS::Queues::Receive(gMedianDistanceQueue, out_cm, 0);
+        return Queues::Receive(gMedianDistanceQueue, out_cm, 0);
     }
 
 }   // namespace CE::Services

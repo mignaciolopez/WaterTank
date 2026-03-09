@@ -50,14 +50,14 @@ namespace CE::OS
             return;
         }
 
-        ESP_LOGD(TAG, "height_cm=%u, criticalLevel_cm=%u, minLevel_cm=%u, maxLevel_cm=%u, radarDelay_ms=%u, medianWindow=%u, weatherDelay_ms=%u",
+        ESP_LOGD(TAG, "height_cm=%u, criticalLevel_cm=%u, minLevel_cm=%u, maxLevel_cm=%u, radarDelay_s=%u, medianWindow=%u, weatherDelay_s=%u",
                settings->height_cm,
                settings->criticalLevel_cm,
                settings->minLevel_cm,
                settings->maxLevel_cm,
-               settings->radarDelay_ms,
+               settings->radarDelay_s,
                settings->medianWindow,
-               settings->weatherDelay_ms);
+               settings->weatherDelay_s);
     }
 
     bool Settings::Load()
@@ -86,9 +86,9 @@ namespace CE::OS
         s.criticalLevel_cm     = doc["criticalLevel_cm"]   | s.criticalLevel_cm;
         s.minLevel_cm          = doc["minLevel_cm"]        | s.minLevel_cm;
         s.maxLevel_cm          = doc["maxLevel_cm"]        | s.maxLevel_cm;
-        s.radarDelay_ms        = doc["radarDelay_ms"]      | s.radarDelay_ms;
+        s.radarDelay_s         = doc["radarDelay_s"]      | s.radarDelay_s;
         s.medianWindow         = doc["medianWindow"]       | s.medianWindow;
-        s.weatherDelay_ms      = doc["weatherDelay_ms"]    | s.weatherDelay_ms;
+        s.weatherDelay_s       = doc["weatherDelay_s"]    | s.weatherDelay_s;
 
         Print();
 
@@ -112,9 +112,9 @@ namespace CE::OS
         doc["criticalLevel_cm"] = s.criticalLevel_cm;
         doc["minLevel_cm"]      = s.minLevel_cm;
         doc["maxLevel_cm"]      = s.maxLevel_cm;
-        doc["radarDelay_ms"]    = s.radarDelay_ms;
+        doc["radarDelay_s"]     = s.radarDelay_s;
         doc["medianWindow"]     = s.medianWindow;
-        doc["weatherDelay_ms"]  = s.weatherDelay_ms;
+        doc["weatherDelay_s"]   = s.weatherDelay_s;
 
         const auto bytesWritten = serializeJson(doc, file);
         file.close();

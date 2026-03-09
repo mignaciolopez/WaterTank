@@ -87,38 +87,35 @@ namespace CE::Services
 
         while (true)
         {
+            // Sleep before the next check
+            Time::SleepMs(s.watchdogCheckInterval_s * 1000);
+            digitalWrite(Pins::kBlueLed, Build::kLedOff);
+
             // Perform health checks
             CheckMemoryHealth();
             CheckWiFiHealth();
             CheckTaskHealth();
 
-            digitalWrite(Config::Pins::kBlueLed, Config::Build::kLedOn);
-            const auto queueCount = OS::Queues::GetCount(errorQueue_);
+            const auto queueCount = Queues::GetCount(errorQueue_);
             for (size_t i = 0; i < queueCount; ++i)
             {
                 Domain::ErrorReport report{};
-                if (OS::Queues::Peek(errorQueue_, report, 0))
+                if (Queues::Peek(errorQueue_, report, 0))
                 {
                     Troubleshoot(report);
                 }
             }
-            OS::Time::SleepMs(1000);
-            digitalWrite(Config::Pins::kBlueLed, Config::Build::kLedOff);
 
             // Save error reports if any new ones
             if (errorCount_ > 0)
             {
                 SaveReports();
-                ClearErrors();
             }
 
             if (restartVotes_ > 0)
             {
                 TriggerESPRestart("Program restart requested");
             }
-
-            // Sleep until next check
-            OS::Time::SleepMs(s.watchdogCheckInterval_ms);
         }
     }
 
@@ -147,6 +144,8 @@ namespace CE::Services
     {
         if (!errorQueue_)
             return;
+
+        digitalWrite(Pins::kBlueLed, Build::kLedOn);
 
         Domain::ErrorReport report = {};
         report.timestamp = time(nullptr);
@@ -214,22 +213,25 @@ namespace CE::Services
             case Domain::ErrorType::StackOverflow:
             case Domain::ErrorType::ServiceStuck:
             case Domain::ErrorType::ServiceCrash:
+            case Domain::ErrorType::TaskDeleted:
                 ProgramESPRestart(report.message);
-                handled = true; // So it won't be stored, and it won't reboot again when reload the report from the file
+                handled = true;
                 break;
             case Domain::ErrorType::WiFiDisconnect:
                 AttemptWiFiReconnect();
-                handled = false;
+                handled = true;
                 break;
             case Domain::ErrorType::QueueEmpty:
             case Domain::ErrorType::QueueFull:
+                handled = false;
+                break;
             case Domain::ErrorType::SensorFailure:
             case Domain::ErrorType::ConfigError:
-            case Domain::ErrorType::TaskDeleted:
             case Domain::ErrorType::WaterLevel:
             case Domain::ErrorType::Unknown:
             default:
                 Notify(report);
+                handled = true;
                 break;
         }
 
