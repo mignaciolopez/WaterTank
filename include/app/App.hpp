@@ -13,6 +13,7 @@
 #include <services/Watchdog.h>
 #include <services/Weather.h>
 #include "services/WiFi.hpp"
+#include "services/WSServer.h"
 
 namespace CE::App
 {
@@ -20,11 +21,6 @@ namespace CE::App
 
     inline bool Setup()
     {
-        if (!SPIFFS.begin(true)) {
-            ESP_LOGE(TAG, "SPIFFS Mount Failed");
-            return false;
-        }
-
         if (!OS::Settings::Setup())
         {
             ESP_LOGE(TAG, "Settings Setup failed");
@@ -43,9 +39,9 @@ namespace CE::App
             return false;
         }
 
-        if (!Services::Watchdog::Setup())
+        if (!Services::WSServer::Setup())
         {
-            ESP_LOGE(TAG, "Watchdog Setup failed");
+            ESP_LOGE(TAG, "WSServer Setup failed");
             return false;
         }
 
@@ -73,18 +69,26 @@ namespace CE::App
             return false;
         }
 
+        if (!Services::Watchdog::Setup())
+        {
+            ESP_LOGE(TAG, "Watchdog Setup failed");
+            return false;
+        }
+
         ESP_LOGI(TAG, "Setup OK");
         return true;
     }
 
     inline void Loop()
     {
+        Services::WSServer::Loop();
+
         Domain::WeatherSample sample = {};
         if (Services::Weather::ReadLast(sample))
         {
-            ESP_LOGI(TAG, "Humidity: %.1f%% Temperature: %.1f°C Heat: %.1f°C.", sample.humidity, sample.tempC, sample.heatIndexC);
+            ESP_LOGI(TAG, "Humidity: %.1f%% Temperature: %.1f°C Heat: %.1f°C.", sample.humidity, sample.temperatureC, sample.heatIndexC);
         }
-        delay(OS::Settings::Get().weatherDelay_s * 1000);
+        delay(OS::Settings::Get().WeatherDelayS * 1000);
     }
 
 }   // namespace CE::App

@@ -4,7 +4,7 @@
 
 #pragma once
 #include <DHT.h>
-#include <domain/Weather.hpp>
+#include <Domain/Samples.hpp>
 
 namespace CE::Drivers
 {

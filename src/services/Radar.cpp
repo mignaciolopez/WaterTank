@@ -3,15 +3,14 @@
 //
 
 #include <config/BuildConfig.hpp>
-#include "config/Pins.hpp"
+#include <config/Pins.hpp>
 #include <drivers/JSN-SR04M-2.h>
 #include <os/Queues.hpp>
+#include <os/Settings.h>
 #include <os/Tasks.hpp>
 #include <os/Time.hpp>
 #include <services/Radar.h>
-#include <os/Settings.h>
-
-#include "services/Watchdog.h"
+#include <services/Watchdog.h>
 
 using namespace CE::OS;
 
@@ -36,7 +35,7 @@ namespace CE::Services
         driver_->Setup();
 
         const bool taskResult = Tasks::Start(Task, TAG, Config::Build::kStackRadarTask, nullptr, Config::Build::kPrioRadar, nullptr);
-        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelay_s * 1000);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().RadarDelayS * 1000);
 
         return taskResult && watchdogResult;
     }
@@ -55,12 +54,12 @@ namespace CE::Services
             }
             else
             {
-                ESP_LOGD(TAG, "timeout/no-echo");
-                Watchdog::ReportError(Domain::ErrorSeverity::Warning, Domain::ErrorType::SensorFailure, TAG, "timeout/no-echo");
+                ESP_LOGE(TAG, "timeout/no-echo");
+                Watchdog::ReportError(Domain::ErrorSeverity::Error, Domain::ErrorType::SensorFailure, TAG, "timeout/no-echo");
             }
 
             Watchdog::NotifyTaskAlive(TAG);
-            Time::SleepMs(Settings::Get().radarDelay_s * 1000);
+            Time::SleepMs(Settings::Get().RadarDelayS * 1000);
         }
     }
 
@@ -70,7 +69,7 @@ namespace CE::Services
         if (!gRadarQueue)
             return false;
 
-        return OS::Queues::Receive(gRadarQueue, out_cm, 0);
+        return Queues::Receive(gRadarQueue, out_cm, 0);
     }
 
 }   // namespace CE::Services

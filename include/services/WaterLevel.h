@@ -10,7 +10,8 @@ namespace CE::Services::WaterLevel
 
     enum WaterLevel
     {
-        Invalid,
+        Invalid = -1,
+        Unknown = 0,
         Full,
         Normal,
         Low,

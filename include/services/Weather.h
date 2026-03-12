@@ -4,7 +4,7 @@
 
 #pragma once
 #include <Arduino.h>
-#include <domain/Weather.hpp>
+#include <Domain/Samples.hpp>
 #include <drivers/DHTDevice.h>
 
 namespace CE::Services

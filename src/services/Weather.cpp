@@ -40,7 +40,7 @@ namespace CE::Services
         driver_->Setup();
 
         const bool taskResult = Tasks::Start(Task, TAG, Build::kStackWeatherTask, nullptr, Build::kPrioWeather, nullptr);
-        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().weatherDelay_s * 1000);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().WeatherDelayS * 1000);
         return taskResult && watchdogResult;
     }
 
@@ -65,7 +65,7 @@ namespace CE::Services
             }
 
             Watchdog::NotifyTaskAlive(TAG);
-            Time::SleepMs(Settings::Get().weatherDelay_s * 1000);
+            Time::SleepMs(Settings::Get().WeatherDelayS * 1000);
         }
     }
 

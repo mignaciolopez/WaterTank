@@ -42,7 +42,7 @@ namespace CE::Domain
         char message[128];                  // Error description
         uint32_t freeHeap;                  // Free heap at error time
         uint32_t minFreeHeap;               // Minimum free heap ever seen
-        unsigned short taskStackWatermark;        // Task stack high watermark (if applicable)
+        unsigned short taskStackWatermark;  // Task stack high watermark (if applicable)
         uint8_t restartCount;               // Number of restarts triggered
     };
 

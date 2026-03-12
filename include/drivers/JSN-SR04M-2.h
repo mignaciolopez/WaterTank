@@ -11,14 +11,14 @@ namespace CE::Drivers
     {
     public:
         static const char* TAG;
-        explicit JSN_SR04M_2(byte trigPin, byte echoPin);
+        explicit JSN_SR04M_2(byte triggerPin, byte echoPin);
 
         void Setup() const;
         bool ReadDistanceCm(unsigned short& out_cm) const;
 
     private:
-        byte trig_;
-        byte echo_;
+        byte _triggerPin;
+        byte _echoPin;
     };
 
 }   // namespace CE::Drivers

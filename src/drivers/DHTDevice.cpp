@@ -28,12 +28,12 @@ namespace CE::Drivers
         ESP_LOGV(TAG, "Reading DHT%d on PIN %d", type_, pin_);
 
         out.humidity = dht_.readHumidity(true);
-        out.tempC = dht_.readTemperature(false, true);
-        out.heatIndexC = dht_.computeHeatIndex(out.tempC, out.humidity, false);
+        out.temperatureC = dht_.readTemperature(false, true);
+        out.heatIndexC = dht_.computeHeatIndex(out.temperatureC, out.humidity, false);
 
-        ESP_LOGD(TAG, "h=%.2f t=%.2f hic=%.2f", out.humidity, out.tempC, out.heatIndexC);
+        ESP_LOGD(TAG, "h=%.2f t=%.2f hic=%.2f", out.humidity, out.temperatureC, out.heatIndexC);
 
-        if (std::isnan(out.humidity) || out.humidity < 0 || std::isnan(out.tempC))
+        if (std::isnan(out.humidity) || out.humidity < 0 || std::isnan(out.temperatureC))
         {
             return false;
         }

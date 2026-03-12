@@ -2,18 +2,16 @@
 // Created by lmartinignacio@gmail.com on 2/27/2026.
 //
 
-#include <services/Filter.h>
-#include <os/Settings.h>
-#include <services/Radar.h>
+#include <algorithm>
+#include <array>
 #include <config/BuildConfig.hpp>
 #include <os/Queues.hpp>
+#include <os/Settings.h>
 #include <os/Tasks.hpp>
 #include <os/Time.hpp>
-#include <array>
-#include <algorithm>
-
-#include "domain/Global.hpp"
-#include "services/Watchdog.h"
+#include <services/Filter.h>
+#include <services/Radar.h>
+#include <services/Watchdog.h>
 
 using namespace CE::OS;
 
@@ -32,7 +30,7 @@ namespace CE::Services
             return false;
 
         const bool taskResult = OS::Tasks::Start(Task, TAG, Config::Build::kStackFilterTask, nullptr, Config::Build::kPrioFilter, nullptr);
-        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelay_s * 1000);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().RadarDelayS * 1000);
 
         return taskResult && watchdogResult;
     }
@@ -56,13 +54,13 @@ namespace CE::Services
 
         while (true)
         {
-            const std::size_t winSize = std::min<std::size_t>(Settings::Get().medianWindow, window.size());
+            const std::size_t winSize = std::min<std::size_t>(Settings::Get().MedianWindow, window.size());
             ESP_LOGD(TAG, "winSize=%d", winSize);
 
             unsigned short raw = 0;
             if (Radar::TryGetLatestRawCm(raw))
             {
-                if (raw > 0 && raw < Settings::Get().height_cm * 100 && winSize >= 3)
+                if (raw > 0 && raw < Settings::Get().heightCm * 100 && winSize >= 3)
                 {
                     window[index] = raw;
                     index = (index + 1) % winSize;
@@ -73,7 +71,7 @@ namespace CE::Services
                     {
                         // copy to temp for median (nth_element mutates)
                         std::array<unsigned short, Config::Build::kMedianMaxWindow> tmp = window;
-                        unsigned short filtered = MedianInPlace(tmp.data(), winSize) + Domain::kFilteredDistanceOffset;
+                        unsigned short filtered = MedianInPlace(tmp.data(), winSize) + Settings::Get().FilteredDistanceOffsetCm * 100;
                         OS::Queues::Overwrite(gMedianDistanceQueue, filtered);
                         ESP_LOGD(TAG, "filtered_cm=%.2f", filtered / 100.0f);
                     }
@@ -86,7 +84,7 @@ namespace CE::Services
             }
 
             Watchdog::NotifyTaskAlive(TAG);
-            Time::SleepMs(Settings::Get().radarDelay_s * 1000);
+            Time::SleepMs(Settings::Get().RadarDelayS * 1000);
         }
     }
 
@@ -96,7 +94,7 @@ namespace CE::Services
         if (!gMedianDistanceQueue)
             return false;
 
-        return Queues::Receive(gMedianDistanceQueue, out_cm, 0);
+        return Queues::Peek(gMedianDistanceQueue, out_cm, 0);
     }
 
 }   // namespace CE::Services

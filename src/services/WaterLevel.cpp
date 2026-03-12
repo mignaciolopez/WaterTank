@@ -15,28 +15,28 @@ namespace CE::Services::WaterLevel
     WaterLevel GetWaterLevelState(const unsigned short distance)
     {
         const auto s = Settings::Get();
-        if (distance > s.height_cm)
+        if (distance > s.heightCm)
         {
-            ESP_LOGE(TAG, "Distance %ucm is higher than configured water tank height: %ucm", distance, s.height_cm);
+            ESP_LOGE(TAG, "Distance %ucm is higher than configured water tank height: %ucm", distance, s.heightCm);
             char msg[128];
-            snprintf(msg, sizeof(msg), "Measured distance %ucm is higher than configured water tank height: %ucm", distance, s.height_cm);
+            snprintf(msg, sizeof(msg), "Measured distance %ucm is higher than configured water tank height: %ucm", distance, s.heightCm);
             Watchdog::ReportError(Domain::ErrorSeverity::Critical, Domain::ErrorType::ConfigError, TAG, msg);
             return Invalid;
         }
 
-        if (distance <= s.height_cm - s.maxLevel_cm)
+        if (distance <= s.heightCm - s.maxLevelCm)
         {
             return Full;
         }
-        if (distance > s.height_cm - s.maxLevel_cm && distance <= s.height_cm - s.minLevel_cm)
+        if (distance > s.heightCm - s.maxLevelCm && distance <= s.heightCm - s.minLevelCm)
         {
             return Normal;
         }
-        if (distance > s.height_cm - s.minLevel_cm && distance <= s.height_cm - s.criticalLevel_cm)
+        if (distance > s.heightCm - s.minLevelCm && distance <= s.heightCm - s.criticalLevelCm)
         {
             return Low;
         }
-        if (distance > s.height_cm - s.criticalLevel_cm)
+        if (distance > s.heightCm - s.criticalLevelCm)
         {
             return Critical;
         }

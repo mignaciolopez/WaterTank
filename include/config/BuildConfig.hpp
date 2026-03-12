@@ -27,11 +27,11 @@ namespace CE::Config::Build
     static constexpr byte kMedianMaxWindow = 10U;
 
     // Task stacks (tune as needed)
-    static constexpr unsigned short kStackWeatherTask   = 24576;
-    static constexpr unsigned short kStackRadarTask     = 24576;
-    static constexpr unsigned short kStackFilterTask    = 24576;
-    static constexpr unsigned short kStackPumpTask      = 24576;
-    static constexpr unsigned short kStackWatchdogTask  = 8192;
+    static constexpr unsigned short kStackWeatherTask   = 12288;
+    static constexpr unsigned short kStackRadarTask     = 12288;
+    static constexpr unsigned short kStackFilterTask    = 12288;
+    static constexpr unsigned short kStackPumpTask      = 12288;
+    static constexpr unsigned short kStackWatchdogTask  = 12288;
 
     // Task priorities
     static constexpr byte kPrioWeather   = 2;

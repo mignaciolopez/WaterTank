@@ -1,32 +1,42 @@
 ﻿//
-// Created by lmart on 3/8/2026.
+// Created by lmartinignacio@gmail.com on 3/8/2026.
 //
 
 #pragma once
 
 #include <ArduinoJson.h>
+#include "services/WaterLevel.h"
 
 namespace CE::Domain::States
 {
     struct Pump
     {
         const char* filename = "/PumpState.json";
-        bool isOnCooldown_ = false;
-        time_t timeStampOn_ = 0;
-        time_t timeStampCooldown_ = 0;
+        bool isOnCooldown = false;
+        bool isOn = false;
+        time_t timeStampOn = 0;
+        time_t timeStampOff = 0;
+        time_t timeStampCooldown = 0;
+        Services::WaterLevel::WaterLevel waterLevel = Services::WaterLevel::WaterLevel::Unknown;
 
-        void toJson(JsonDocument obj) const
+        void toJson(const JsonVariant dst, const char* name = "pump") const
         {
-            obj["isOnCooldown_"] = isOnCooldown_;
-            obj["timeStampOn_"] = timeStampOn_;
-            obj["timeStampCooldown_"] = timeStampCooldown_;
+            ESP_LOGD("Pump", "toJson");
+            dst[name]["isOnCooldown"]         = isOnCooldown;
+            dst[name]["isOn"]                 = isOn;
+            dst[name]["timeStampOn"]          = timeStampOn;
+            dst[name]["timeStampOff"]         = timeStampOff;
+            dst[name]["timeStampCooldown"]    = timeStampCooldown;
         }
 
-        void fromJson(const JsonObject obj)
+        void fromJson(const JsonObject obj, const char* name = "pump")
         {
-            isOnCooldown_ = obj["isOnCooldown_"] | false;
-            timeStampOn_ = obj["timeStampOn_"] | 0;
-            timeStampCooldown_ = obj["timeStampCooldown_"] | 0;
+            ESP_LOGD("Pump", "fromJson");
+            isOnCooldown        = obj[name]["isOnCooldown"]       | false;
+            isOn                = obj[name]["isOn"]               | false;
+            timeStampOn         = obj[name]["timeStampOn"]        | 0;
+            timeStampOff        = obj[name]["timeStampOff"]       | 0;
+            timeStampCooldown   = obj[name]["timeStampCooldown"]  | 0;
         }
     };
 }

@@ -18,10 +18,9 @@ using namespace CE::OS;
 namespace CE::Services
 {
     const char* Pump::TAG = "Pump-Service";
-    Domain::States::Pump Pump::state_{};
-    PersistentState<Domain::States::Pump> Pump::persistent_(state_);
+    Domain::States::Pump Pump::_state{};
+    PersistentState<Domain::States::Pump> Pump::persistent_(_state);
     Drivers::Relay* Pump::driver_ = nullptr;
-    bool Pump::isOn_ = false;
 
     Pump::Pump() = default;
 
@@ -38,32 +37,58 @@ namespace CE::Services
         persistent_.Read();
 
         const bool taskResult = Tasks::Start(Task, TAG, Config::Build::kStackPumpTask, nullptr, Config::Build::kPrioPump, nullptr);
-        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelay_s * 1000);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().RadarDelayS * 1000);
 
         return taskResult && watchdogResult;
     }
 
+    void Pump::Switch(const bool on)
+    {
+        if (on) SwitchOn();
+        else SwitchOff();
+    }
+
     void Pump::SwitchOn()
     {
-        if (!isOn_ && !state_.isOnCooldown_)
+        if (_state.waterLevel == WaterLevel::Full || _state.waterLevel == WaterLevel::Invalid || _state.waterLevel == WaterLevel::Unknown)
         {
-            Settings::Get().radarDelay_s = 1u;
-            state_.timeStampOn_ = Time::Get();
+            ESP_LOGI(TAG, "Cannot turn pump on when water level is full or still reading");
+            Watchdog::ReportError(Domain::ErrorSeverity::Info, Domain::ErrorType::WaterLevel, TAG, "Cannot turn pump on when water level is full or still reading");
+            return;
+        }
+
+        if (!_state.isOn && !_state.isOnCooldown)
+        {
+            if (Time::Get() - _state.timeStampOff < 10)
+            {
+                ESP_LOGW(TAG, "Can not switch pump to fast!");
+                return;
+            }
+
+            Settings::Get().RadarDelayS = 1u;
+            _state.timeStampOn = Time::Get();
             ESP_LOGI(TAG, "Pump turned ON at: %s", OS::Time::GetFormattedTime());
             driver_->SwitchOn();
-            isOn_ = true;
+            _state.isOn = true;
             persistent_.Save();
         }
     }
 
     void Pump::SwitchOff()
     {
-        if (isOn_)
+        if (_state.isOn)
         {
-            if (!Settings::Load()) Settings::Get().radarDelay_s = 30u;
+            if (Time::Get() - _state.timeStampOn < 10)
+            {
+                ESP_LOGW(TAG, "Can not switch pump to fast!");
+                return;
+            }
+
+            if (!Settings::Load()) Settings::Get().RadarDelayS = 30u;
+            _state.timeStampOff = Time::Get();
             ESP_LOGI(TAG, "Pump turned OFF at: %s", OS::Time::GetFormattedTime());
             driver_->SwitchOff();
-            isOn_ = false;
+            _state.isOn = false;
             persistent_.Save();
         }
     }
@@ -79,8 +104,8 @@ namespace CE::Services
             {
                 ESP_LOGI(TAG, "Median Distance: %.1fcm.", medianDistance / 100.0f);
                 ESP_LOGI(TAG, "Water Level State: %s", WaterLevel::GetWaterLevelString(medianDistance / 100u));
-                const auto status = WaterLevel::GetWaterLevelState(medianDistance / 100u);
-                switch (status)
+                _state.waterLevel = WaterLevel::GetWaterLevelState(medianDistance / 100u);
+                switch (_state.waterLevel)
                 {
                     case WaterLevel::Invalid:
                         ESP_LOGE(TAG, "Invalid water level state");
@@ -106,7 +131,7 @@ namespace CE::Services
                         //Do nothing
                         break;
                     default:
-                        ESP_LOGE(TAG, "Water State not handled %d", status);
+                        ESP_LOGE(TAG, "Water State not handled %d", _state.waterLevel);
                         Watchdog::ReportError(Domain::ErrorSeverity::Error, Domain::ErrorType::WaterLevel, TAG, "Water State not handled");
                         break;
                 }
@@ -115,20 +140,21 @@ namespace CE::Services
             MonitorCooldown();
             MonitorTimeOn();
             Watchdog::NotifyTaskAlive(TAG);
-            Time::SleepMs(Settings::Get().radarDelay_s * 1000);
+            Time::SleepMs(Settings::Get().RadarDelayS * 1000);
         }
     }
 
     void Pump::MonitorTimeOn()
     {
-        if (isOn_)
+        if (_state.isOn)
         {
             const auto& s = Settings::Get();
-            if (Time::Get() - state_.timeStampOn_ > s.pumpMaxTimeOn_m * 60)
+            ESP_LOGI(TAG, "MonitorTimeOn: On at: %d should turn of in: %d seconds.", _state.timeStampOn, Time::Get() - _state.timeStampOn);
+            if (Time::Get() - _state.timeStampOn > s.PumpMaxTimeOnM * 60)
             {
                 SwitchOff();
-                state_.isOnCooldown_ = true;
-                state_.timeStampCooldown_ = Time::Get();
+                _state.isOnCooldown = true;
+                _state.timeStampCooldown = Time::Get();
                 Watchdog::ReportError(Domain::ErrorSeverity::Error, Domain::ErrorType::PumpTimeout, TAG, "Pump timeout");
                 persistent_.Save();
             }
@@ -137,12 +163,13 @@ namespace CE::Services
 
     void Pump::MonitorCooldown()
     {
-        if (state_.isOnCooldown_)
+        if (_state.isOnCooldown)
         {
             const auto& s = Settings::Get();
-            if (Time::Get() - state_.timeStampCooldown_ > s.pumpCooldownTime_m * 60)
+            ESP_LOGI(TAG, "MonitorCooldown at: %d should release pump in: %d seconds.", _state.timeStampCooldown, Time::Get() - _state.timeStampCooldown);
+            if (Time::Get() - _state.timeStampCooldown > s.PumpCooldownTimeM * 60)
             {
-                state_.isOnCooldown_ = false;
+                _state.isOnCooldown = false;
                 persistent_.Save();
             }
         }

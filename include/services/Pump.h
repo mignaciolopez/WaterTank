@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "WaterLevel.h"
 #include "domain/States.hpp"
 #include "drivers/Relay.h"
 #include "os/PersistentState.hpp"
@@ -18,21 +19,22 @@ namespace CE::Services
         Pump();
         [[nodiscard]] static bool Setup();
 
-        static void SwitchOn();
-        static void SwitchOff();
+        static void Switch(bool on);
+        static const Domain::States::Pump& GetState() { return _state; }
 
     private:
         [[noreturn]] static void Task(void* pvParameters);
 
+        static void SwitchOn();
+        static void SwitchOff();
+
         static void MonitorTimeOn();
         static void MonitorCooldown();
 
-        static Domain::States::Pump state_;
+        static Domain::States::Pump _state;
         static OS::PersistentState<Domain::States::Pump> persistent_;
 
         static Drivers::Relay* driver_;
-        static bool isOn_;
-
     };
 
 }   // namespace CE::Services

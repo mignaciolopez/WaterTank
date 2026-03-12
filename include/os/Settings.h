@@ -20,9 +20,8 @@ namespace CE::OS
         [[nodiscard]] static bool Load();
         [[nodiscard]] static bool Save();
 
-        static void Print();
-
-        static Domain::Settings* settings;
+    private:
+        static Domain::Settings* _settings;
     };
 
 }   // namespace CE::Services
