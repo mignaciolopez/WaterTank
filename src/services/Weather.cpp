@@ -15,6 +15,8 @@
 #include <services/Watchdog.h>
 #include <services/Weather.h>
 
+#include "services/WSServer.h"
+
 
 using namespace CE::OS;
 using namespace CE::Config;
@@ -57,6 +59,7 @@ namespace CE::Services
                 Domain::g_speed_cm_per_us = Domain::g_speed_m_per_s / 10000.0f;
 
                 Queues::Overwrite(gWeatherQueue, sample);
+                WSServer::Broadcast("weather", sample);
             }
             else
             {

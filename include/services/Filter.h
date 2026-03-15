@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "domain/Samples.hpp"
 #include "os/Queues.hpp"
 
 namespace CE::Services
@@ -17,7 +18,7 @@ namespace CE::Services
         Filter();
         [[nodiscard]] static bool Setup();
 
-        static bool TryGetLatestFilteredCm(unsigned short& out_cm);
+        static bool TryGetLatestFilteredCm(Domain::RadarSample& sample);
 
     private:
         [[noreturn]] static void Task(void* pvParameters);

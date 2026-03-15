@@ -31,8 +31,8 @@ namespace CE::Drivers
         ESP_LOGV(TAG, "ReadDistanceCm");
 
         // Timeout prevents blocking forever
-        //const auto timeout = static_cast<unsigned long>(static_cast<float>(OS::Settings::Get().heightCm) * 2.0f / Domain::g_speed_cm_per_us);
-        //ESP_LOGD(TAG, "timeout_us=%u", timeout);
+        const auto timeout = static_cast<unsigned long>(static_cast<float>(OS::Settings::Get().heightCm) * 2.0f / Domain::g_speed_cm_per_us);
+        ESP_LOGD(TAG, "timeout_us=%u", timeout);
 
         unsigned long duration_us = 0;
 
@@ -43,7 +43,7 @@ namespace CE::Drivers
             digitalWrite(_triggerPin, HIGH);
             delayMicroseconds(250);
             digitalWrite(_triggerPin, LOW);
-            duration_us = pulseIn(_echoPin, HIGH/*, timeout*/);
+            duration_us = pulseIn(_echoPin, HIGH, timeout);
         }
 
         if (duration_us == 0)

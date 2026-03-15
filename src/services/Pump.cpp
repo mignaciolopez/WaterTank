@@ -12,6 +12,7 @@
 #include <os/Settings.h>
 #include "services/Watchdog.h"
 #include "services/WaterLevel.h"
+#include "services/WSServer.h"
 
 using namespace CE::OS;
 
@@ -99,12 +100,13 @@ namespace CE::Services
 
         while (true)
         {
-            unsigned short medianDistance = 0;
-            if (Filter::TryGetLatestFilteredCm(medianDistance))
+            Domain::RadarSample sample = {};
+            if (Filter::TryGetLatestFilteredCm(sample))
             {
-                ESP_LOGI(TAG, "Median Distance: %.1fcm.", medianDistance / 100.0f);
-                ESP_LOGI(TAG, "Water Level State: %s", WaterLevel::GetWaterLevelString(medianDistance / 100u));
-                _state.waterLevel = WaterLevel::GetWaterLevelState(medianDistance / 100u);
+                sample.distanceCm /= 100.0f;
+                ESP_LOGI(TAG, "Median Distance: %.1fcm.", sample.distanceCm);
+                ESP_LOGI(TAG, "Water Level State: %s", WaterLevel::GetWaterLevelString(sample.distanceCm));
+                _state.waterLevel = WaterLevel::GetWaterLevelState(static_cast<unsigned short>(sample.distanceCm));
                 switch (_state.waterLevel)
                 {
                     case WaterLevel::Invalid:
@@ -135,6 +137,9 @@ namespace CE::Services
                         Watchdog::ReportError(Domain::ErrorSeverity::Error, Domain::ErrorType::WaterLevel, TAG, "Water State not handled");
                         break;
                 }
+
+                WSServer::Broadcast("distance", sample);
+                WSServer::Broadcast("pumpStatus", Pump::GetState());
             }
 
             MonitorCooldown();
@@ -149,7 +154,7 @@ namespace CE::Services
         if (_state.isOn)
         {
             const auto& s = Settings::Get();
-            ESP_LOGI(TAG, "MonitorTimeOn: On at: %d should turn of in: %d seconds.", _state.timeStampOn, Time::Get() - _state.timeStampOn);
+            ESP_LOGI(TAG, "MonitorTimeOn: On at: %d should turn of in: %d seconds.", _state.timeStampOn, s.PumpMaxTimeOnM * 60 - (Time::Get() - _state.timeStampOn));
             if (Time::Get() - _state.timeStampOn > s.PumpMaxTimeOnM * 60)
             {
                 SwitchOff();
@@ -166,7 +171,7 @@ namespace CE::Services
         if (_state.isOnCooldown)
         {
             const auto& s = Settings::Get();
-            ESP_LOGI(TAG, "MonitorCooldown at: %d should release pump in: %d seconds.", _state.timeStampCooldown, Time::Get() - _state.timeStampCooldown);
+            ESP_LOGI(TAG, "MonitorCooldown at: %d should release pump in: %d seconds.", _state.timeStampCooldown, s.PumpCooldownTimeM * 60 - (Time::Get() - _state.timeStampCooldown));
             if (Time::Get() - _state.timeStampCooldown > s.PumpCooldownTimeM * 60)
             {
                 _state.isOnCooldown = false;

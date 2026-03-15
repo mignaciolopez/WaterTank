@@ -44,7 +44,7 @@ namespace CE::Services
         {
             case WS_EVT_CONNECT:
                 ESP_LOGI(TAG, "Client #%u connected from %s", client->id(), client->remoteIP().toString().c_str());
-                BroadcastSettings();
+                Broadcast("settings", OS::Settings::Get());
                 break;
                 
             case WS_EVT_DISCONNECT:
@@ -81,74 +81,51 @@ namespace CE::Services
             
             if (strcmp(command, "getPumpStatus") == 0)
             {
-                BroadcastPumpStatus(Pump::GetState());
+                Broadcast("pumpStatus", Pump::GetState());
             }
             else if (strcmp(command, "setPump") == 0)
             {
                 Pump::Switch(doc["state"]);
-                BroadcastPumpStatus(Pump::GetState());
+                Broadcast("pumpStatus", Pump::GetState());
             }
             else if (strcmp(command, "getStatus") == 0)
             {
                 // Send all current statuses
-                Domain::WeatherSample sample;
-                if (Weather::ReadLast(sample))
+                Domain::WeatherSample weatherSample;
+                if (Weather::ReadLast(weatherSample))
                 {
-                    BroadcastWeather(sample);
+                    Broadcast("weather", weatherSample);
                 }
                 
-                unsigned short out_cm = 0;
-                if (Filter::TryGetLatestFilteredCm(out_cm))
+                Domain::RadarSample radarSample;
+                if (Filter::TryGetLatestFilteredCm(radarSample))
                 {
-                    BroadcastDistance(static_cast<float>(out_cm) / 100.0f);
+                    radarSample.distanceCm /= 100.0f;
+                    Broadcast("distance", radarSample);
                 }
                 
-                BroadcastPumpStatus(Pump::GetState());
+                Broadcast("pumpStatus", Pump::GetState());
+            }
+            else if (strcmp(command, "getSettings") == 0)
+            {
+                Broadcast("settings", OS::Settings::Get());
+            }
+            else if (strcmp(command, "setSettings") == 0)
+            {
+                OS::Settings::Get().fromJson(doc.as<JsonObject>());
             }
         }
     }
-    
-    void WSServer::BroadcastDistance(const float distanceCm)
+
+    template <typename T>
+    void WSServer::Broadcast(const char* header, const T& sample)
     {
         JsonDocument doc;
-        doc["header"]   = "distance";
-        doc["payload"]  = distanceCm;
-        
-        char buffer[128];
-        const size_t len = serializeJson(doc, buffer);
-        _ws.textAll(buffer, len);
-    }
-    
-    void WSServer::BroadcastWeather(const Domain::WeatherSample& sample)
-    {
-        JsonDocument doc;
-        doc["header"]   = "weather";
+        doc["header"]   =   header;
         sample.toJson(doc.as<JsonVariant>(), "payload");
 
-        char buffer[256];
+        String buffer;
         const size_t len = serializeJson(doc, buffer);
-        _ws.textAll(buffer, len);
-    }
-    
-    void WSServer::BroadcastPumpStatus(const Domain::States::Pump& sample)
-    {
-        JsonDocument doc;
-        doc["header"]   = "pumpStatus";
-        sample.toJson(doc.as<JsonVariant>(), "payload");
-        
-        char buffer[256];
-        const size_t len = serializeJson(doc, buffer);
-        _ws.textAll(buffer, len);
-    }
-
-    void WSServer::BroadcastSettings()
-    {
-        JsonDocument doc;
-        doc["header"]   =   "settings";
-        OS::Settings::Get().toJson(doc.as<JsonVariant>(), "payload");
-
-        char buffer[512];
-        const size_t len = serializeJson(doc, buffer);
-        _ws.textAll(buffer, len);
+        _ws.textAll(buffer.c_str(), len);
     }
 }

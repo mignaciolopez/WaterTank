@@ -88,13 +88,20 @@ namespace CE::Services
         }
     }
 
-    bool Filter::TryGetLatestFilteredCm(unsigned short& out_cm)
+    bool Filter::TryGetLatestFilteredCm(Domain::RadarSample& sample)
     {
         ESP_LOGV(TAG, "TryGetLatestFilteredCm");
         if (!gMedianDistanceQueue)
             return false;
 
-        return Queues::Peek(gMedianDistanceQueue, out_cm, 0);
+        unsigned short dummy = 0;
+        if (Queues::Peek(gMedianDistanceQueue, dummy, 0))
+        {
+            sample.distanceCm = dummy;
+            return true;
+        }
+
+        return false;
     }
 
 }   // namespace CE::Services

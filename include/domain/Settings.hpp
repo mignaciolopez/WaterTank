@@ -12,24 +12,27 @@ namespace CE::Domain
     struct Settings
     {
         //Tank Water Distance levels measured from bottom to top
-        unsigned short heightCm                    = 130u;             //Water tank height, max distance to measure
-        unsigned short criticalLevelCm             = 20u;              //Critical water level to START pumping even during Nighttime.
-        unsigned short minLevelCm                  = 50u;              //Minimum water level to START pumping
-        unsigned short maxLevelCm                  = heightCm - 25u;   //Maximum water level to STOP pumping
+        unsigned short heightCm                    = 140u;              //Water tank height, max distance to measure
+        unsigned short criticalLevelCm             = 20u;               //Critical water level to START pumping even during Nighttime.
+        unsigned short minLevelCm                  = 50u;               //Minimum water level to START pumping
+        unsigned short maxLevelCm                  = 130u;              //Maximum water level to STOP pumping - Sensor position
+
+        //Ultrasonic Sensor
+        unsigned short sensorRangeMinCm            = 25u;               //25cm for JRT
 
         //Measure delays
         unsigned short RadarDelayS                 = 5u;               //Delay between distance measures
         unsigned short WeatherDelayS               = 30u;              //Delay between weather updates
         unsigned short MedianWindow                = 5u;               //Number of measures to median
+        unsigned short WatchdogCheckIntervalS      = 60u;              //Delay between health checks
 
         // Watchdog settings
-        unsigned short WatchdogCheckIntervalS      = 60u;              //Delay between health checks
         unsigned short WifiReconnectTimeoutS       = 30u;              //WiFi reconnect attempt timeout
         unsigned short MaxServiceRestarts          = 10u;              //Max service restart attempts before ESP restart
         unsigned short MinFreeHeapThresholdKb      = 20u;              //Minimum free heap (KB) before warning
         unsigned short MaxErrorReports             = 50u;              //Max error reports to store in SPIFFS
 
-        // Security Settings
+        // Pump Settings
         unsigned short PumpMaxTimeOnM              = 20u;              //Max time in minutes Pump can be On
         unsigned short PumpCooldownTimeM           = 60u;              //Time in minutes Pump needs to cool down after a max Time On triggered.
 
@@ -44,6 +47,8 @@ namespace CE::Domain
             dst[name]["criticalLevelCm"]               = criticalLevelCm;
             dst[name]["minLevelCm"]                    = minLevelCm;
             dst[name]["maxLevelCm"]                    = maxLevelCm;
+
+            dst[name]["sensorRangeMinCm"]              = sensorRangeMinCm;
 
             dst[name]["RadarDelayS"]                   = RadarDelayS;
             dst[name]["WeatherDelayS"]                 = WeatherDelayS;
@@ -68,6 +73,8 @@ namespace CE::Domain
             criticalLevelCm             = obj[name]["criticalLevelCm"]          | criticalLevelCm;
             minLevelCm                  = obj[name]["minLevelCm"]               | minLevelCm;
             maxLevelCm                  = obj[name]["maxLevelCm"]               | maxLevelCm;
+
+            sensorRangeMinCm            = obj[name]["sensorRangeMinCm"]         | sensorRangeMinCm;
 
             RadarDelayS                 = obj[name]["RadarDelayS"]              | RadarDelayS;
             WeatherDelayS               = obj[name]["WeatherDelayS"]            | WeatherDelayS;

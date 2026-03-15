@@ -8,6 +8,21 @@
 
 namespace CE::Domain
 {
+    struct RadarSample
+    {
+        float distanceCm = .0f;
+
+        void toJson(const JsonVariant dst, const char* name = "radar") const
+        {
+            dst[name]["distanceCm"] = distanceCm;
+        }
+
+        void fromJson(const JsonObject obj, const char* name = "radar")
+        {
+            distanceCm = obj[name]["distanceCm"] | distanceCm;
+        }
+    };
+
     struct WeatherSample
     {
         float temperatureC  = .0f;

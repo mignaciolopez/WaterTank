@@ -12,13 +12,9 @@ namespace CE::Services
     public:
         static bool Setup();
         static void Loop();
-        
-        // Send data to all connected clients
-        static void BroadcastDistance(float distanceCm);
-        static void BroadcastWeather(const Domain::WeatherSample& sample);
-        static void BroadcastPumpStatus(const Domain::States::Pump& sample);
 
-        static void BroadcastSettings();
+        template<class T>
+        static void Broadcast(const char *header, const T &sample);
 
     private:
         static AsyncWebServer _server;

@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <SPIFFS.h>
 #include <services/Filter.h>
 #include <Services/NTP.hpp>
 #include "services/Pump.h"
@@ -86,8 +85,10 @@ namespace CE::App
         Domain::WeatherSample sample = {};
         if (Services::Weather::ReadLast(sample))
         {
-            ESP_LOGI(TAG, "Humidity: %.1f%% Temperature: %.1f°C Heat: %.1f°C.", sample.humidity, sample.temperatureC, sample.heatIndexC);
+            ESP_LOGI(TAG, "Humidity: %.1f%% Temperature: %.1f°C Heat: %.1f°C.",
+                sample.humidity, sample.temperatureC, sample.heatIndexC);
         }
+
         delay(OS::Settings::Get().WeatherDelayS * 1000);
     }
 
