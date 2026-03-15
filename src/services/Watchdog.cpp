@@ -37,7 +37,7 @@ namespace CE::Services
 
         // Create an error queue (ring buffer for last N errors)
         const auto& s = Settings::Get();
-        errorQueue_ = OS::Queues::CreateQueue<Domain::ErrorReport>(s.MaxErrorReports);
+        errorQueue_ = OS::Queues::CreateQueue<Domain::ErrorReport>(s.maxErrorReports);
         if (!errorQueue_)
         {
             ESP_LOGE(TAG, "Failed to create error queue");
@@ -88,7 +88,7 @@ namespace CE::Services
         while (true)
         {
             // Sleep before the next check
-            Time::SleepMs(s.WatchdogCheckIntervalS * 1000);
+            Time::SleepMs(s.watchdogDelayS * 1000);
             digitalWrite(Pins::kBlueLed, Build::kLedOff);
 
             // Perform health checks
@@ -247,7 +247,7 @@ namespace CE::Services
     {
         const auto freeHeap = ESP.getFreeHeap();
         const auto& s = Settings::Get();
-        const uint32_t thresholdBytes = s.MinFreeHeapThresholdKb * 1024u;
+        const uint32_t thresholdBytes = s.minFreeHeapThresholdKb * 1024u;
 
         ESP_LOGD(TAG, "Free heap: %u bytes, Min free heap: %u bytes", freeHeap, ESP.getMinFreeHeap());
 
@@ -295,7 +295,7 @@ namespace CE::Services
 
         const auto& s = Settings::Get();
         const auto startTime = millis();
-        const auto timeout = s.WifiReconnectTimeoutS * 1000u;
+        const auto timeout = s.wifiReconnectTimeoutS * 1000u;
 
         WiFi.reconnect();
 

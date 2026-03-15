@@ -112,7 +112,15 @@ namespace CE::Services
             }
             else if (strcmp(command, "setSettings") == 0)
             {
+                ESP_LOGI(TAG, "Processing command setSettings");
                 OS::Settings::Get().fromJson(doc.as<JsonObject>());
+                if (OS::Settings::Save())
+                {
+                    if (OS::Settings::Load())
+                    {
+                        Broadcast("settings", OS::Settings::Get());
+                    }
+                }
             }
         }
     }

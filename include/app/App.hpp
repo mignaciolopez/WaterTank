@@ -89,7 +89,7 @@ namespace CE::App
                 sample.humidity, sample.temperatureC, sample.heatIndexC);
         }
 
-        delay(OS::Settings::Get().WeatherDelayS * 1000);
+        delay(OS::Settings::Get().weatherDelayS * 1000);
     }
 
 }   // namespace CE::App

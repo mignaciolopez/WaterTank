@@ -21,23 +21,23 @@ namespace CE::Domain
         unsigned short sensorRangeMinCm            = 25u;               //25cm for JRT
 
         //Measure delays
-        unsigned short RadarDelayS                 = 5u;               //Delay between distance measures
-        unsigned short WeatherDelayS               = 30u;              //Delay between weather updates
-        unsigned short MedianWindow                = 5u;               //Number of measures to median
-        unsigned short WatchdogCheckIntervalS      = 60u;              //Delay between health checks
+        unsigned short radarDelayS                 = 5u;               //Delay between distance measures
+        unsigned short weatherDelayS               = 30u;              //Delay between weather updates
+        unsigned short medianWindow                = 5u;               //Number of measures to median
+        unsigned short watchdogDelayS              = 60u;              //Delay between health checks
 
         // Watchdog settings
-        unsigned short WifiReconnectTimeoutS       = 30u;              //WiFi reconnect attempt timeout
-        unsigned short MaxServiceRestarts          = 10u;              //Max service restart attempts before ESP restart
-        unsigned short MinFreeHeapThresholdKb      = 20u;              //Minimum free heap (KB) before warning
-        unsigned short MaxErrorReports             = 50u;              //Max error reports to store in SPIFFS
+        unsigned short wifiReconnectTimeoutS       = 30u;              //WiFi reconnect attempt timeout
+        unsigned short maxServiceRestarts          = 10u;              //Max service restart attempts before ESP restart
+        unsigned short minFreeHeapThresholdKb      = 20u;              //Minimum free heap (KB) before warning
+        unsigned short maxErrorReports             = 50u;              //Max error reports to store in SPIFFS
 
         // Pump Settings
-        unsigned short PumpMaxTimeOnM              = 20u;              //Max time in minutes Pump can be On
-        unsigned short PumpCooldownTimeM           = 60u;              //Time in minutes Pump needs to cool down after a max Time On triggered.
+        unsigned short pumpMaxTimeOnM              = 20u;              //Max time in minutes Pump can be On
+        unsigned short pumpCooldownTimeM           = 60u;              //Time in minutes Pump needs to cool down after a max Time On triggered.
 
         // Distance
-        unsigned short FilteredDistanceOffsetCm    = 0u;               //Distance offset in cm
+        unsigned short filteredDistanceOffsetCm    = 0u;               //Distance offset in cm
 
         void toJson(const JsonVariant dst, const char* name = "settings") const
         {
@@ -50,25 +50,26 @@ namespace CE::Domain
 
             dst[name]["sensorRangeMinCm"]              = sensorRangeMinCm;
 
-            dst[name]["RadarDelayS"]                   = RadarDelayS;
-            dst[name]["WeatherDelayS"]                 = WeatherDelayS;
-            dst[name]["MedianWindow"]                  = MedianWindow;
+            dst[name]["radarDelayS"]                   = radarDelayS;
+            dst[name]["weatherDelayS"]                 = weatherDelayS;
+            dst[name]["medianWindow"]                  = medianWindow;
+            dst[name]["watchdogDelayS"]                = watchdogDelayS;
 
-            dst[name]["WatchdogCheckIntervalS"]        = WatchdogCheckIntervalS;
-            dst[name]["WifiReconnectTimeoutS"]         = WifiReconnectTimeoutS;
-            dst[name]["MaxServiceRestarts"]            = MaxServiceRestarts;
-            dst[name]["MinFreeHeapThresholdKb"]        = MinFreeHeapThresholdKb;
-            dst[name]["MaxErrorReports"]               = MaxErrorReports;
+            dst[name]["wifiReconnectTimeoutS"]         = wifiReconnectTimeoutS;
+            dst[name]["maxServiceRestarts"]            = maxServiceRestarts;
+            dst[name]["minFreeHeapThresholdKb"]        = minFreeHeapThresholdKb;
+            dst[name]["maxErrorReports"]               = maxErrorReports;
 
-            dst[name]["PumpMaxTimeOnM"]                = PumpMaxTimeOnM;
-            dst[name]["PumpCooldownTimeM"]             = PumpCooldownTimeM;
+            dst[name]["pumpMaxTimeOnM"]                = pumpMaxTimeOnM;
+            dst[name]["pumpCooldownTimeM"]             = pumpCooldownTimeM;
 
-            dst[name]["FilteredDistanceOffsetCm"]      = FilteredDistanceOffsetCm;
+            dst[name]["filteredDistanceOffsetCm"]      = filteredDistanceOffsetCm;
         }
 
         void fromJson(const JsonObject obj, const char* name = "settings")
         {
             ESP_LOGD("Settings", "fromJson");
+            //ESP_LOGI("Settings", "fromJson: obj[%s][%d]", name, obj[name]["pumpMaxTimeOnM"].as<unsigned short>());
             heightCm                    = obj[name]["heightCm"]                 | heightCm;
             criticalLevelCm             = obj[name]["criticalLevelCm"]          | criticalLevelCm;
             minLevelCm                  = obj[name]["minLevelCm"]               | minLevelCm;
@@ -76,20 +77,20 @@ namespace CE::Domain
 
             sensorRangeMinCm            = obj[name]["sensorRangeMinCm"]         | sensorRangeMinCm;
 
-            RadarDelayS                 = obj[name]["RadarDelayS"]              | RadarDelayS;
-            WeatherDelayS               = obj[name]["WeatherDelayS"]            | WeatherDelayS;
-            MedianWindow                = obj[name]["MedianWindow"]             | MedianWindow;
+            radarDelayS                 = obj[name]["radarDelayS"]              | radarDelayS;
+            weatherDelayS               = obj[name]["weatherDelayS"]            | weatherDelayS;
+            medianWindow                = obj[name]["medianWindow"]             | medianWindow;
+            watchdogDelayS              = obj[name]["watchdogDelayS"]           | watchdogDelayS;
 
-            WatchdogCheckIntervalS      = obj[name]["WatchdogCheckIntervalS"]   | WatchdogCheckIntervalS;
-            WifiReconnectTimeoutS       = obj[name]["WifiReconnectTimeoutS"]    | WifiReconnectTimeoutS;
-            MaxServiceRestarts          = obj[name]["MaxServiceRestarts"]       | MaxServiceRestarts;
-            MinFreeHeapThresholdKb      = obj[name]["MinFreeHeapThresholdKb"]   | MinFreeHeapThresholdKb;
-            MaxErrorReports             = obj[name]["MaxErrorReports"]          | MaxErrorReports;
+            wifiReconnectTimeoutS       = obj[name]["wifiReconnectTimeoutS"]    | wifiReconnectTimeoutS;
+            maxServiceRestarts          = obj[name]["maxServiceRestarts"]       | maxServiceRestarts;
+            minFreeHeapThresholdKb      = obj[name]["minFreeHeapThresholdKb"]   | minFreeHeapThresholdKb;
+            maxErrorReports             = obj[name]["maxErrorReports"]          | maxErrorReports;
 
-            PumpMaxTimeOnM              = obj[name]["PumpMaxTimeOnM"]           | PumpMaxTimeOnM;
-            PumpCooldownTimeM           = obj[name]["PumpCooldownTimeM"]        | PumpCooldownTimeM;
+            pumpMaxTimeOnM              = obj[name]["pumpMaxTimeOnM"]           | pumpMaxTimeOnM;
+            pumpCooldownTimeM           = obj[name]["pumpCooldownTimeM"]        | pumpCooldownTimeM;
 
-            FilteredDistanceOffsetCm    = obj[name]["FilteredDistanceOffsetCm"] | FilteredDistanceOffsetCm;
+            filteredDistanceOffsetCm    = obj[name]["filteredDistanceOffsetCm"] | filteredDistanceOffsetCm;
         }
     };
 

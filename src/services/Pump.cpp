@@ -38,7 +38,7 @@ namespace CE::Services
         persistent_.Read();
 
         const bool taskResult = Tasks::Start(Task, TAG, Config::Build::kStackPumpTask, nullptr, Config::Build::kPrioPump, nullptr);
-        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().RadarDelayS * 1000);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelayS * 1000);
 
         return taskResult && watchdogResult;
     }
@@ -66,7 +66,7 @@ namespace CE::Services
                 return;
             }
 
-            Settings::Get().RadarDelayS = 1u;
+            Settings::Get().radarDelayS = 1u;
             _state.timeStampOn = Time::Get();
             ESP_LOGI(TAG, "Pump turned ON at: %s", OS::Time::GetFormattedTime());
             driver_->SwitchOn();
@@ -85,7 +85,7 @@ namespace CE::Services
                 return;
             }
 
-            if (!Settings::Load()) Settings::Get().RadarDelayS = 30u;
+            if (!Settings::Load()) Settings::Get().radarDelayS = 30u;
             _state.timeStampOff = Time::Get();
             ESP_LOGI(TAG, "Pump turned OFF at: %s", OS::Time::GetFormattedTime());
             driver_->SwitchOff();
@@ -113,24 +113,23 @@ namespace CE::Services
                         ESP_LOGE(TAG, "Invalid water level state");
                         Watchdog::ReportError(Domain::ErrorSeverity::Critical, Domain::ErrorType::WaterLevel, TAG, "Invalid water level state");
                         break;
-                    case WaterLevel::Critical:
-                        SwitchOn();
-                        break;
-                    case WaterLevel::Low:
-                        if (OS::Time::IsNightTime())
-                        {
-                            SwitchOff();
-                        }
-                        else
-                        {
-                            SwitchOn();
-                        }
-                        break;
                     case WaterLevel::Full:
                         SwitchOff();
                         break;
                     case WaterLevel::Normal:
-                        //Do nothing
+                        if (Time::IsNightTime())
+                        {
+                            SwitchOff();
+                        }
+                        break;
+                    case WaterLevel::Low:
+                        if (!Time::IsNightTime())
+                        {
+                            SwitchOn();
+                        }
+                        break;
+                    case WaterLevel::Critical:
+                        SwitchOn();
                         break;
                     default:
                         ESP_LOGE(TAG, "Water State not handled %d", _state.waterLevel);
@@ -145,7 +144,7 @@ namespace CE::Services
             MonitorCooldown();
             MonitorTimeOn();
             Watchdog::NotifyTaskAlive(TAG);
-            Time::SleepMs(Settings::Get().RadarDelayS * 1000);
+            Time::SleepMs(Settings::Get().radarDelayS * 1000);
         }
     }
 
@@ -154,8 +153,8 @@ namespace CE::Services
         if (_state.isOn)
         {
             const auto& s = Settings::Get();
-            ESP_LOGI(TAG, "MonitorTimeOn: On at: %d should turn of in: %d seconds.", _state.timeStampOn, s.PumpMaxTimeOnM * 60 - (Time::Get() - _state.timeStampOn));
-            if (Time::Get() - _state.timeStampOn > s.PumpMaxTimeOnM * 60)
+            ESP_LOGI(TAG, "MonitorTimeOn: On at: %d should turn of in: %d seconds.", _state.timeStampOn, s.pumpMaxTimeOnM * 60 - (Time::Get() - _state.timeStampOn));
+            if (Time::Get() - _state.timeStampOn > s.pumpMaxTimeOnM * 60)
             {
                 SwitchOff();
                 _state.isOnCooldown = true;
@@ -171,8 +170,8 @@ namespace CE::Services
         if (_state.isOnCooldown)
         {
             const auto& s = Settings::Get();
-            ESP_LOGI(TAG, "MonitorCooldown at: %d should release pump in: %d seconds.", _state.timeStampCooldown, s.PumpCooldownTimeM * 60 - (Time::Get() - _state.timeStampCooldown));
-            if (Time::Get() - _state.timeStampCooldown > s.PumpCooldownTimeM * 60)
+            ESP_LOGI(TAG, "MonitorCooldown at: %d should release pump in: %d seconds.", _state.timeStampCooldown, s.pumpCooldownTimeM * 60 - (Time::Get() - _state.timeStampCooldown));
+            if (Time::Get() - _state.timeStampCooldown > s.pumpCooldownTimeM * 60)
             {
                 _state.isOnCooldown = false;
                 persistent_.Save();

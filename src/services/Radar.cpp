@@ -35,7 +35,7 @@ namespace CE::Services
         driver_->Setup();
 
         const bool taskResult = Tasks::Start(Task, TAG, Config::Build::kStackRadarTask, nullptr, Config::Build::kPrioRadar, nullptr);
-        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().RadarDelayS * 1000);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelayS * 1000);
 
         return taskResult && watchdogResult;
     }
@@ -59,7 +59,7 @@ namespace CE::Services
             }
 
             Watchdog::NotifyTaskAlive(TAG);
-            Time::SleepMs(Settings::Get().RadarDelayS * 1000);
+            Time::SleepMs(Settings::Get().radarDelayS * 1000);
         }
     }
 

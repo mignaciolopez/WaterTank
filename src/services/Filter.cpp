@@ -30,7 +30,7 @@ namespace CE::Services
             return false;
 
         const bool taskResult = OS::Tasks::Start(Task, TAG, Config::Build::kStackFilterTask, nullptr, Config::Build::kPrioFilter, nullptr);
-        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().RadarDelayS * 1000);
+        const bool watchdogResult = Watchdog::RegisterTask(TAG, Settings::Get().radarDelayS * 1000);
 
         return taskResult && watchdogResult;
     }
@@ -54,7 +54,7 @@ namespace CE::Services
 
         while (true)
         {
-            const std::size_t winSize = std::min<std::size_t>(Settings::Get().MedianWindow, window.size());
+            const std::size_t winSize = std::min<std::size_t>(Settings::Get().medianWindow, window.size());
             ESP_LOGD(TAG, "winSize=%d", winSize);
 
             unsigned short raw = 0;
@@ -71,7 +71,7 @@ namespace CE::Services
                     {
                         // copy to temp for median (nth_element mutates)
                         std::array<unsigned short, Config::Build::kMedianMaxWindow> tmp = window;
-                        unsigned short filtered = MedianInPlace(tmp.data(), winSize) + Settings::Get().FilteredDistanceOffsetCm * 100;
+                        unsigned short filtered = MedianInPlace(tmp.data(), winSize) + Settings::Get().filteredDistanceOffsetCm * 100;
                         OS::Queues::Overwrite(gMedianDistanceQueue, filtered);
                         ESP_LOGD(TAG, "filtered_cm=%.2f", filtered / 100.0f);
                     }
@@ -84,7 +84,7 @@ namespace CE::Services
             }
 
             Watchdog::NotifyTaskAlive(TAG);
-            Time::SleepMs(Settings::Get().RadarDelayS * 1000);
+            Time::SleepMs(Settings::Get().radarDelayS * 1000);
         }
     }
 

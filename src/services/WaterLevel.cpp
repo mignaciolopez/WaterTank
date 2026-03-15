@@ -24,24 +24,29 @@ namespace CE::Services::WaterLevel
             return Invalid;
         }
 
-        if (distance <= s.heightCm - s.maxLevelCm)
+        if (distance == 0)
+        {
+            return Unknown;
+        }
+
+        if (distance <= s.sensorRangeMinCm)
         {
             return Full;
         }
-        if (distance > s.heightCm - s.maxLevelCm && distance <= s.heightCm - s.minLevelCm)
+        if (distance > s.sensorRangeMinCm && distance <= s.maxLevelCm - s.sensorRangeMinCm - s.minLevelCm)
         {
             return Normal;
         }
-        if (distance > s.heightCm - s.minLevelCm && distance <= s.heightCm - s.criticalLevelCm)
+        if (distance > s.maxLevelCm - s.sensorRangeMinCm - s.minLevelCm && distance <= s.maxLevelCm - s.sensorRangeMinCm - s.criticalLevelCm)
         {
             return Low;
         }
-        if (distance > s.heightCm - s.criticalLevelCm)
+        if (distance > s.maxLevelCm - s.sensorRangeMinCm - s.criticalLevelCm)
         {
             return Critical;
         }
 
-        return Invalid;
+        return Unknown;
     }
 
     const char* GetWaterLevelString(const unsigned short distance)
