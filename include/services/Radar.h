@@ -3,7 +3,8 @@
 //
 
 #pragma once
-#include "drivers/JSN-SR04M-2.h"
+//#include <drivers/JSN-SR04M-2.h>
+#include <drivers/HC-SR04.h>
 
 namespace CE::Services
 {
@@ -21,7 +22,7 @@ namespace CE::Services
     private:
         [[noreturn]] static void Task(void* pvParameters);
 
-        static Drivers::JSN_SR04M_2* driver_;
+        static Drivers::HC_SR04* driver_;
     };
 
 }   // namespace CE::Services

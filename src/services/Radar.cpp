@@ -4,7 +4,6 @@
 
 #include <config/BuildConfig.hpp>
 #include <config/Pins.hpp>
-#include <drivers/JSN-SR04M-2.h>
 #include <os/Queues.hpp>
 #include <os/Settings.h>
 #include <os/Tasks.hpp>
@@ -18,7 +17,7 @@ namespace CE::Services
 {
     const char* Radar::TAG = "Radar-Service";
     QueueHandle_t Radar::gRadarQueue = nullptr;
-    Drivers::JSN_SR04M_2* Radar::driver_ = nullptr;
+    Drivers::HC_SR04* Radar::driver_ = nullptr;
 
     Radar::Radar() = default;
 
@@ -30,7 +29,7 @@ namespace CE::Services
             return false;
 
         if (!driver_)
-            driver_ = new Drivers::JSN_SR04M_2(Config::Pins::kTrigPin, Config::Pins::kEchoPin);
+            driver_ = new Drivers::HC_SR04(Config::Pins::kTrigPin, Config::Pins::kEchoPin);
 
         driver_->Setup();
 
