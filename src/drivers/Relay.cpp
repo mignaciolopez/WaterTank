@@ -8,8 +8,8 @@ namespace CE::Drivers
 {
     const char* Relay::TAG = "Pump-Driver";
 
-    Relay::Relay(const byte switchPin, const byte ledPin, const byte trigPin)
-        : switchPin_(switchPin), led_(ledPin), trig_(trigPin), state(false)
+    Relay::Relay(const byte switchPin)
+        : switchPin_(switchPin), state(false)
     {
         ESP_LOGV(TAG, "Constructor");
     }
@@ -19,11 +19,8 @@ namespace CE::Drivers
         ESP_LOGV(TAG, "Setup");
 
         pinMode(switchPin_, OUTPUT);
-        pinMode(led_,       OUTPUT);
-        pinMode(trig_,      INPUT_PULLUP);
 
         digitalWrite(switchPin_,   LOW);
-        digitalWrite(led_,      LOW);
 
         return true;
     }
@@ -31,7 +28,6 @@ namespace CE::Drivers
     void Relay::SwitchOn()
     {
         ESP_LOGV(TAG, "SwitchOn");
-        digitalWrite(led_, HIGH);
         digitalWrite(switchPin_, HIGH);
         state = true;
     }
@@ -40,7 +36,6 @@ namespace CE::Drivers
     {
         ESP_LOGV(TAG, "SwitchOff");
         digitalWrite(switchPin_, LOW);
-        digitalWrite(led_, LOW);
         state = false;
     }
 

@@ -27,15 +27,15 @@ namespace CE::Config::Pins
     static constexpr byte kBlueLed = 2;
 
     // DHT
-    static constexpr byte kDhtPin = 13;
+    static constexpr byte kDhtPin = 21;
     static constexpr byte kDhtType = DHT11;
 
     // Ultrasonic
-    static constexpr byte kTrigPin = 12;
-    static constexpr byte kEchoPin = 14;
+    static constexpr byte kTrigPin = 22;
+    static constexpr byte kEchoPin = 23;
 
     //Pump
-    static constexpr byte kPumpSwitchPin = 34;
+    static constexpr byte kPumpSwitchPin = 18;
 
 #else
     static constexpr byte kBlueLed = 2;

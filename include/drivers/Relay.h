@@ -11,7 +11,7 @@ namespace CE::Drivers
     {
     public:
         static const char* TAG;
-        Relay(byte switchPin, byte ledPin, byte trigPin);
+        Relay(byte switchPin);
 
         [[nodiscard]] bool Setup() const;
 
@@ -21,8 +21,6 @@ namespace CE::Drivers
 
     private:
         byte switchPin_;
-        byte led_;
-        byte trig_;
         bool state;
     };
 } // CE::Drivers
