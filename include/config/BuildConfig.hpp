@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <cstddef>
 #include "ArduinoJson/Variant/VariantRefBase.hpp"
 
 namespace CE::Config::Build
@@ -13,11 +12,11 @@ namespace CE::Config::Build
     static constexpr byte kLedOn = LOW;
     static constexpr byte kLedOff = HIGH;
 #elif CONFIG_IDF_TARGET_ESP32
-    static constexpr byte kBlueLedOn = HIGH;
-    static constexpr byte kBlueLedOff = LOW;
+    static constexpr byte kLedOn = HIGH;
+    static constexpr byte kLedOff = LOW;
 #else
-    static constexpr byte kBlueLedOn = HIGH;
-    static constexpr byte kBlueLedOff = LOW;
+    static constexpr byte kLedOn = HIGH;
+    static constexpr byte kLedOff = LOW;
 #endif
 
     // Logging
